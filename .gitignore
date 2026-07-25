@@ -1,0 +1,14 @@
+config.json
+data/*.json
+data/*.log
+output/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+.idea/
+.hermes/
+test_local.json
+test_match.json
+test_usdb.json
+test_songs/

@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USDB Song Importer</title>
+<style>
+:root {
+  --bg: #0d0e12;
+  --bg-panel: rgba(255,255,255,0.04);
+  --bg-panel-hover: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08);
+  --border-active: rgba(255,255,255,0.18);
+  --text: #e4e4e7;
+  --text-dim: #8b8b94;
+  --accent: #f59e0b;
+  --accent-dim: rgba(245,158,11,0.15);
+  --green: #22c55e;
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --radius: 10px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  font-family: 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width:8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius:4px; }
+
+/* Layout */
+.app { display:flex; min-height:100vh; }
+.sidebar {
+  width: 220px; min-height:100vh;
+  background: rgba(0,0,0,0.3);
+  border-right: 1px solid var(--border);
+  padding: 20px 0;
+  display:flex; flex-direction:column;
+  gap: 4px;
+  position: sticky; top:0;
+}
+.sidebar-logo {
+  padding: 0 24px 20px;
+  font-size: 18px; font-weight: 700;
+  color: var(--accent);
+}
+.nav-item {
+  padding: 12px 24px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s;
+  font-size: 14px;
+  display:flex; align-items:center; gap:10px;
+}
+.nav-item:hover { background: var(--bg-panel-hover); color: var(--text); }
+.nav-item.active { color: var(--accent); background: var(--accent-dim); }
+.nav-icon { font-size: 16px; width:20px; text-align:center; }
+
+.main { flex:1; padding: 32px; max-width:1100px; }
+.main h1 { font-size: 22px; margin-bottom: 6px; }
+.main .subtitle { color: var(--text-dim); font-size:13px; margin-bottom: 24px; }
+
+/* Panels */
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.panel-title { font-size: 14px; font-weight:600; margin-bottom: 14px; }
+
+/* Inputs */
+textarea, input[type="text"], input[type="password"] {
+  width: 100%;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  transition: border 0.15s;
+}
+textarea { min-height: 100px; resize: vertical; font-family: 'Consolas', monospace; }
+textarea:focus, input:focus { border-color: var(--border-active); }
+
+/* Buttons */
+.btn {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.btn-ghost:hover { background: var(--bg-panel-hover); color: var(--text); }
+.btn-sm { padding: 6px 14px; font-size: 12px; }
+.btn-danger { background: var(--red); color:#fff; }
+
+.btn-row { display:flex; gap:8px; margin-top: 12px; }
+
+/* Queue table */
+.queue-table { width:100%; border-collapse: collapse; }
+.queue-table th {
+  text-align: left; font-size: 11px; text-transform: uppercase;
+  color: var(--text-dim); padding: 8px 10px; border-bottom: 1px solid var(--border);
+}
+.queue-table td {
+  padding: 10px; border-bottom: 1px solid var(--border); font-size: 13px;
+}
+.queue-table tr:hover td { background: var(--bg-panel-hover); }
+
+.status-badge {
+  display: inline-block; padding: 2px 8px; border-radius: 4px;
+  font-size: 11px; font-weight: 600;
+}
+.status-pending    { background: rgba(139,139,148,0.15); color: var(--text-dim); }
+.status-processing { background: rgba(59,130,246,0.15); color: var(--blue); }
+.status-done       { background: rgba(34,197,94,0.15); color: var(--green); }
+.status-error      { background: rgba(239,68,68,0.15); color: var(--red); }
+
+.spinner {
+  display:inline-block; width:12px; height:12px;
+  border: 2px solid rgba(59,130,246,0.3);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Stats row */
+.stats { display: flex; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.stat-card {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 20px;
+  min-width: 120px;
+}
+.stat-num { font-size: 24px; font-weight: 700; }
+.stat-label { font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
+.stat-card.green .stat-num { color: var(--green); }
+.stat-card.red .stat-num { color: var(--red); }
+.stat-card.blue .stat-num { color: var(--blue); }
+
+/* Progress bar */
+.progress-bar {
+  width: 100%; height: 4px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+/* Tabs inside settings */
+.settings-row { display:flex; gap: 20px; align-items: flex-start; }
+.settings-row > div { flex:1; }
+
+.cookie-test-result {
+  margin-top: 8px; font-size: 13px; padding: 8px 12px;
+  border-radius: 6px; display: none;
+}
+.cookie-test-ok { background: rgba(34,197,94,0.1); color: var(--green); display:block !important; }
+.cookie-test-err { background: rgba(239,68,68,0.1); color: var(--red); display:block !important; }
+
+/* Worker toggle */
+.worker-toggle {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.worker-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--text-dim);
+}
+.worker-dot.running { background: var(--green); box-shadow: 0 0 8px var(--green); }
+
+/* Match report */
+.match-section { margin-bottom: 20px; }
+.match-section h3 {
+  font-size: 13px; margin-bottom: 8px;
+  display: flex; align-items: center; gap: 8px;
+}
+.match-count {
+  background: var(--bg-panel); border: 1px solid var(--border);
+  border-radius: 4px; padding: 1px 8px; font-size: 12px; color: var(--text-dim);
+}
+.match-list { font-size: 13px; }
+.match-list .item {
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+.match-list .item:last-child { border: none; }
+.badges { display: flex; gap: 4px; }
+.badge {
+  font-size: 10px; padding: 1px 6px; border-radius: 3px;
+}
+.badge-ok { background: rgba(34,197,94,0.1); color: var(--green); }
+.badge-missing { background: rgba(239,68,68,0.1); color: var(--red); }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-active);
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 13px;
+  backdrop-filter: blur(12px);
+  z-index: 999;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.2s;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">USDB Importer</div>
+    <div class="nav-item active" data-tab="queue" onclick="showTab('queue')">
+      <span class="nav-icon">&#9776;</span> Queue
+    </div>
+    <div class="nav-item" data-tab="settings" onclick="showTab('settings')">
+      <span class="nav-icon">&#9881;</span> Einstellungen
+    </div>
+    <div class="nav-item" data-tab="local" onclick="showTab('local')">
+      <span class="nav-icon">&#128193;</span> Lokale Songs
+    </div>
+    <div class="nav-item" data-tab="match" onclick="showTab('match')">
+      <span class="nav-icon">&#128279;</span> Match Report
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- QUEUE TAB -->
+    <div id="tab-queue">
+      <h1>Song Queue</h1>
+      <div class="subtitle">USDB-Links einfuegen, Worker starten, Live-Status verfolgen.</div>
+
+      <div class="worker-toggle">
+        <div class="worker-dot" id="workerDot"></div>
+        <span id="workerStatus" style="color:var(--text-dim); font-size:13px;">Worker gestoppt</span>
+        <div style="margin-left:auto;">
+          <button class="btn btn-sm" id="btnStart" onclick="startWorker()">Start</button>
+          <button class="btn btn-ghost btn-sm" id="btnStop" onclick="stopWorker()" disabled>Stop</button>
+        </div>
+      </div>
+
+      <div id="cookieWarning" style="display:none; padding:10px 16px; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); border-radius:8px; margin-bottom:16px; font-size:13px; color:var(--accent);">
+        &#9888; Kein Cookie aktiv. Bitte zuerst unter <strong>Einstellungen &rarr; Browser-Login</strong> einloggen.
+      </div>
+
+      <div class="stats" id="statsRow">
+        <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
+        <div class="stat-card blue"><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending</div></div>
+        <div class="stat-card"><div class="stat-num" id="statProcessing">0</div><div class="stat-label">Processing</div></div>
+        <div class="stat-card green"><div class="stat-num" id="statDone">0</div><div class="stat-label">Done</div></div>
+        <div class="stat-card red"><div class="stat-num" id="statError">0</div><div class="stat-label">Error</div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Links hinzufuegen</div>
+        <textarea id="linkInput" placeholder="Eine USDB-URL pro Zeile, z.B.:&#10;https://usdb.animux.de/index.php?link=detail&id=3045"></textarea>
+        <div class="btn-row">
+          <button class="btn btn-sm" onclick="addLinks()">Zur Queue hinzufuegen</button>
+          <button class="btn btn-ghost btn-sm" onclick="clearQueue()">Alle entfernen</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Warteschlange</div>
+        <table class="queue-table">
+          <thead>
+            <tr>
+              <th style="width:40px">#</th>
+              <th>Song</th>
+              <th style="width:120px">Status</th>
+              <th>Progress</th>
+              <th style="width:80px">YT</th>
+              <th style="width:30px"></th>
+            </tr>
+          </thead>
+          <tbody id="queueBody"></tbody>
+        </table>
+        <div id="queueEmpty" style="color:var(--text-dim); text-align:center; padding:24px; font-size:13px;">
+          Queue ist leer. Fuege Links oben hinzu.
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div id="tab-settings" style="display:none;">
+      <h1>Einstellungen</h1>
+      <div class="subtitle">Cookie und Pfade verwalten.</div>
+
+      <div class="panel">
+        <div class="panel-title">USDB Session</div>
+        <div id="cookieStatusBox" style="margin-bottom:14px; padding:12px; border-radius:6px; font-size:13px; display:none;"></div>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn btn-sm" onclick="openLoginWindow()">&#128274; Browser-Login oeffnen</button>
+          <button class="btn btn-ghost btn-sm" onclick="testCookie()">Cookie testen</button>
+          <button class="btn btn-ghost btn-sm" onclick="forgetCookie()" style="color:var(--red);">Cookie loeschen</button>
+        </div>
+        <details style="margin-top:14px;">
+          <summary style="font-size:12px; color:var(--text-dim); cursor:pointer;">Cookie manuell eingeben (Erweitert)</summary>
+          <textarea id="cookieInput" placeholder="PHPSESSID=abc123; ..." style="min-height:60px; margin-top:10px;"></textarea>
+          <div class="btn-row">
+            <button class="btn btn-sm" onclick="saveCookie()">Manuell speichern</button>
+          </div>
+        </details>
+        <div class="cookie-test-result" id="cookieResult"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Output-Ordner (fertige Songs)</div>
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;">
+          Pro Song wird ein Ordner erstellt mit .txt (Lyrics+Timing), Cover, MP3 und Video (via YouTube).
+        </p>
+        <input type="text" id="outputInput" placeholder="D:\UltraStar\Songs">
+        <div class="btn-row">
+          <button class="btn btn-sm" onclick="saveOutput()">Speichern</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Lokaler UltraStar-Ordner</div>
+        <input type="text" id="pathInput" placeholder="D:\UltraStar\Songs">
+        <div class="btn-row">
+          <button class="btn btn-sm" onclick="savePath()">Speichern</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">Request-Delay (Sekunden)</div>
+        <input type="text" id="delayInput" placeholder="0.5" style="max-width:100px;">
+        <div class="btn-row">
+          <button class="btn btn-sm" onclick="saveDelay()">Speichern</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LOCAL TAB -->
+    <div id="tab-local" style="display:none;">
+      <h1>Lokale Songs</h1>
+      <div class="subtitle">UltraStar-Ordner scannen und Assets pruefen.</div>
+
+      <div class="panel">
+        <div class="panel-title">Ordner scannen</div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="text" id="localScanPath" placeholder="D:\UltraStar\Songs" style="flex:1;">
+          <button class="btn btn-sm" onclick="scanLocal()">Scannen</button>
+        </div>
+        <div id="localScanResult" style="margin-top:12px; font-size:13px;"></div>
+      </div>
+
+      <div class="panel" id="localSongsPanel" style="display:none;">
+        <div class="panel-title">Gefundene Songs (<span id="localCount">0</span>)</div>
+        <div id="localSongList" style="max-height:500px; overflow-y:auto;"></div>
+      </div>
+    </div>
+
+    <!-- MATCH TAB -->
+    <div id="tab-match" style="display:none;">
+      <h1>Match Report</h1>
+      <div class="subtitle">USDB-Daten mit lokaler Bibliothek abgleichen.</div>
+
+      <div class="btn-row" style="margin-bottom:16px;">
+        <button class="btn btn-sm" onclick="runMatch()">Match erstellen</button>
+        <button class="btn btn-ghost btn-sm" onclick="downloadMatch()">Download JSON</button>
+      </div>
+
+      <div id="matchContent"></div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// === Tab switching ===
+function showTab(tab) {
+  document.querySelectorAll('[id^="tab-"]').forEach(el => el.style.display = 'none');
+  document.getElementById('tab-' + tab).style.display = '';
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.querySelector(`.nav-item[data-tab="${tab}"]`).classList.add('active');
+}
+
+// === Toast ===
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// === Helpers ===
+async function api(url, opts) {
+  const r = await fetch(url, opts);
+  if (!r.ok) {
+    const err = await r.text().catch(() => '');
+    throw new Error(`HTTP ${r.status}: ${err}`);
+  }
+  return r;
+}
+
+async function apiJSON(url, opts) {
+  const r = await api(url, opts);
+  return r.json();
+}
+
+// === SSE ===
+const evt = new EventSource('/stream');
+evt.addEventListener('message', (e) => {
+  const msg = JSON.parse(e.data);
+  if (msg.type === 'queue') renderQueue(msg.data);
+  else if (msg.type === 'status') updateStatus(msg.data);
+  else if (msg.type === 'cookie_set') {
+    updateCookieStatus(msg.data);
+    checkCookieStatus();
+  }
+  else if (msg.type === 'worker_stopped') {
+    updateWorkerUI(false);
+    fetchQueue();
+  }
+});
+
+// === Queue rendering ===
+function renderQueue(items) {
+  const tbody = document.getElementById('queueBody');
+  const empty = document.getElementById('queueEmpty');
+  tbody.innerHTML = '';
+  let stats = {total:0, pending:0, processing:0, done:0, error:0};
+
+  if (!items || items.length === 0) {
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    items.forEach(item => {
+      stats.total++;
+      stats[item.status] = (stats[item.status] || 0) + 1;
+      const tr = document.createElement('tr');
+      const statusLabel = {
+        pending: 'Wartet', processing: 'Laeuft', done: 'Fertig', error: 'Fehler'
+      }[item.status] || item.status;
+      const songName = item.artist || item.title
+        ? `${item.artist || ''} - ${item.title || ''}`
+        : item.url;
+      const spinner = item.status === 'processing' ? '<span class="spinner"></span> ' : '';
+      const ytIcon = item.youtube_url ? '&#10004;' : '&mdash;';
+      const folder = item.output_folder
+        ? `<div style="font-size:11px; color:var(--green); margin-top:2px;">&#128193; ${escapeHtml(item.output_folder)}</div>`
+        : '';
+      tr.innerHTML = `
+        <td style="color:var(--text-dim);">${item.id}</td>
+        <td>${escapeHtml(songName)}${folder}</td>
+        <td><span class="status-badge status-${item.status}">${statusLabel}</span></td>
+        <td style="color:var(--text-dim); font-size:12px;">${spinner}${escapeHtml(item.progress || '')}</td>
+        <td style="text-align:center;">${ytIcon}</td>
+        <td>
+          ${item.status === 'pending'
+            ? `<span style="cursor:pointer; color:var(--text-dim);" onclick="removeItem(${item.id})">&#10006;</span>`
+            : ''}
+          ${item.status === 'error'
+            ? `<span style="cursor:pointer; color:var(--accent); font-size:16px;" onclick="retryItem(${item.id})" title="Erneut versuchen">&#8635;</span>`
+            : ''}
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('statTotal').textContent = stats.total;
+  document.getElementById('statPending').textContent = stats.pending || 0;
+  document.getElementById('statProcessing').textContent = stats.processing || 0;
+  document.getElementById('statDone').textContent = stats.done || 0;
+  document.getElementById('statError').textContent = stats.error || 0;
+}
+
+function updateStatus(data) {
+  // Full re-render of the queue to reflect changes
+  fetchQueue();
+  // Show toast on errors and completions
+  if (data.status === 'error') {
+    toast('Fehler: ' + (data.progress || 'unbekannt'));
+  }
+}
+
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+// === API calls ===
+async function fetchQueue() {
+  try {
+    const data = await apiJSON('/api/queue');
+    renderQueue(data);
+  } catch(e) { toast('Queue-Load fehlgeschlagen'); }
+}
+
+async function addLinks() {
+  const text = document.getElementById('linkInput').value;
+  if (!text.trim()) return;
+  const r = await fetch('/api/queue/add', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({urls: text})});
+  const data = await r.json().catch(() => ({}));
+  if (data.added) document.getElementById('linkInput').value = '';
+  if (r.ok) toast(data.added + ' Link(s) hinzugefuegt');
+  else toast(`${data.added || 0} hinzugefuegt; Fehler: ${(data.errors || [data.error || 'unbekannt']).join(' | ')}`);
+}
+
+async function clearQueue() {
+  try { await api('/api/queue/clear', {method:'POST'}); toast('Queue geleert'); }
+  catch(e) { toast('Fehler beim Leeren'); }
+}
+
+async function removeItem(id) {
+  try { await api('/api/queue/remove/' + id, {method:'POST'}); }
+  catch(e) { toast('Fehler beim Entfernen'); }
+}
+
+async function retryItem(id) {
+  try {
+    const data = await apiJSON('/api/queue/retry/' + id, {method:'POST'});
+    if (data.ok) toast('Item zurueck in Warteschlange');
+    else toast(data.error || 'Fehler beim Retry');
+  } catch(e) { toast('Fehler beim Retry'); }
+}
+
+async function startWorker() {
+  try {
+    const data = await apiJSON('/api/worker/start', {method:'POST'});
+    if (data.ok) { updateWorkerUI(true); toast('Worker gestartet'); }
+    else toast(data.error || 'Fehler');
+  } catch(e) { toast('Fehler beim Starten'); }
+}
+
+async function stopWorker() {
+  try { await api('/api/worker/stop', {method:'POST'}); updateWorkerUI(false); toast('Worker gestoppt'); }
+  catch(e) { toast('Fehler beim Stoppen'); }
+}
+
+function updateWorkerUI(running) {
+  document.getElementById('workerDot').classList.toggle('running', running);
+  document.getElementById('workerStatus').textContent = running ? 'Worker laeuft' : 'Worker gestoppt';
+  document.getElementById('workerStatus').style.color = running ? 'var(--green)' : 'var(--text-dim)';
+  document.getElementById('btnStart').disabled = running;
+  document.getElementById('btnStop').disabled = !running;
+}
+
+// Poll worker status
+setInterval(async () => {
+  const r = await fetch('/api/worker/status');
+  const data = await r.json();
+  updateWorkerUI(data.running);
+}, 2000);
+
+// === Settings ===
+async function loadSettings() {
+  try {
+    const data = await apiJSON('/api/settings');
+    document.getElementById('pathInput').value = data.local_path || '';
+    document.getElementById('localScanPath').value = data.local_path || '';
+    document.getElementById('delayInput').value = data.delay || 0.5;
+    document.getElementById('outputInput').value = data.output_path || '';
+  } catch(e) { console.error('Settings load failed', e); }
+}
+
+async function saveCookie() {
+  const input = document.getElementById('cookieInput');
+  const cookie = input.value;
+  try {
+    await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cookie})});
+    input.value = '';
+    toast('Cookie im Credential Manager gespeichert');
+  } catch(e) { toast('Fehler beim Speichern'); }
+}
+
+async function testCookie() {
+  const cookie = document.getElementById('cookieInput').value;
+  const result = document.getElementById('cookieResult');
+  result.className = 'cookie-test-result';
+  result.textContent = 'Teste ...';
+  try {
+    const data = await apiJSON('/api/cookie/test', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cookie})});
+    if (data.ok) {
+      result.className = 'cookie-test-result cookie-test-ok';
+      result.textContent = 'OK! Song erkannt: ' + data.song;
+    } else {
+      result.className = 'cookie-test-result cookie-test-err';
+      result.textContent = 'Fehler: ' + (data.error || 'unbekannt');
+    }
+  } catch(e) {
+    result.className = 'cookie-test-result cookie-test-err';
+    result.textContent = 'Netzwerkfehler: ' + e.message;
+  }
+}
+
+async function savePath() {
+  const path = document.getElementById('pathInput').value;
+  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({local_path: path})}); document.getElementById('localScanPath').value = path; toast('Pfad gespeichert'); }
+  catch(e) { toast('Fehler beim Speichern'); }
+}
+
+async function saveDelay() {
+  const raw = document.getElementById('delayInput').value.trim();
+  if (!raw) { toast('Delay eingeben'); return; }
+  const delay = Number(raw);
+  if (!Number.isFinite(delay)) { toast('Delay muss eine Zahl sein'); return; }
+  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({delay})}); toast('Delay gespeichert'); }
+  catch(e) { toast('Ungueltiger Delay'); }
+}
+
+async function saveOutput() {
+  const path = document.getElementById('outputInput').value;
+  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({output_path: path})}); toast('Output-Ordner gespeichert'); }
+  catch(e) { toast('Fehler beim Speichern'); }
+}
+
+// === Local scan ===
+async function scanLocal() {
+  const path = document.getElementById('localScanPath').value;
+  if (!path) { toast('Pfad eingeben'); return; }
+  document.getElementById('localScanResult').textContent = 'Scanne ...';
+  try {
+    const data = await apiJSON('/api/local/scan', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({path})});
+    if (data.ok) {
+      document.getElementById('localScanResult').textContent = data.count + ' Songs gefunden.';
+      document.getElementById('localSongsPanel').style.display = '';
+      document.getElementById('localCount').textContent = data.count;
+      renderLocalSongs(data.songs);
+    } else {
+      document.getElementById('localScanResult').textContent = 'Fehler: ' + data.error;
+    }
+  } catch(e) {
+    document.getElementById('localScanResult').textContent = 'Netzwerkfehler: ' + e.message;
+  }
+}
+
+function renderLocalSongs(songs) {
+  const container = document.getElementById('localSongList');
+  container.innerHTML = '';
+  songs.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.style.cssText = 'padding:8px 0; border-bottom:1px solid var(--border); font-size:13px;';
+    const a = s.assets || {};
+    div.innerHTML = `
+      <span>${escapeHtml(s.artist || '?')} - ${escapeHtml(s.title || '?')}</span>
+      <span class="badges">
+        ${a.has_mp3 ? '<span class="badge badge-ok">MP3</span>' : '<span class="badge badge-missing">MP3?</span>'}
+        ${a.has_video ? '<span class="badge badge-ok">VID</span>' : '<span class="badge badge-missing">VID?</span>'}
+        ${a.has_cover ? '<span class="badge badge-ok">COV</span>' : '<span class="badge badge-missing">COV?</span>'}
+      </span>`;
+    container.appendChild(div);
+  });
+}
+
+// === Match ===
+async function runMatch() {
+  document.getElementById('matchContent').innerHTML = '<p style="color:var(--text-dim);">Erstelle Match ...</p>';
+  try {
+    const data = await apiJSON('/api/match');
+    renderMatch(data);
+  } catch(e) {
+    document.getElementById('matchContent').innerHTML = '<p style="color:var(--red);">Fehler: ' + e.message + '</p>';
+  }
+}
+
+function renderMatch(data) {
+  const c = document.getElementById('matchContent');
+  let html = '';
+
+  const sections = [
+    {key:'matched', label:'Matched', color:'var(--green)'},
+    {key:'usdb_only', label:'Nur USDB', color:'var(--blue)'},
+    {key:'local_only', label:'Nur lokal', color:'var(--accent)'},
+    {key:'missing_video', label:'Fehlendes Video', color:'var(--red)'},
+    {key:'missing_cover', label:'Fehlendes Cover', color:'var(--red)'},
+    {key:'missing_mp3', label:'Fehlendes MP3', color:'var(--red)'},
+    {key:'missing_youtube', label:'Fehlender YT-Link', color:'var(--red)'},
+  ];
+
+  sections.forEach(sec => {
+    const items = data[sec.key] || [];
+    html += `<div class="match-section">
+      <h3><span style="color:${sec.color};">${sec.label}</span>
+           <span class="match-count">${items.length}</span></h3>
+      <div class="match-list">`;
+    items.slice(0, 50).forEach(item => {
+      const name = `${item.artist || '?'} - ${item.title || '?'}`;
+      html += `<div class="item"><span>${escapeHtml(name)}</span></div>`;
+    });
+    if (items.length > 50) html += `<div style="color:var(--text-d); padding:6px 0;">... und ${items.length-50} weitere</div>`;
+    html += '</div></div>';
+  });
+
+  c.innerHTML = html;
+}
+
+async function downloadMatch() {
+  window.location.href = '/api/match/download';
+}
+
+// === Init ===
+loadSettings();
+fetchQueue();
+
+// === SSE Cookie listener ===
+function setupCookieSSE() {
+  evt.addEventListener('message', (e) => {
+    const msg = JSON.parse(e.data);
+    if (msg.type === 'cookie_set') updateCookieStatus(msg.data);
+  });
+}
+setupCookieSSE();
+
+function updateCookieStatus(data) {
+  const box = document.getElementById('cookieStatusBox');
+  if (!box) return;
+  if (data && data.ok) {
+    box.style.display = 'block';
+    box.style.background = 'rgba(34,197,94,0.1)';
+    box.style.color = 'var(--green)';
+    box.innerHTML = '&#10004; Eingeloggt (Cookie aktiv)';
+  } else {
+    box.style.display = 'block';
+    box.style.background = 'rgba(139,139,148,0.1)';
+    box.style.color = 'var(--text-dim)';
+    box.innerHTML = '&#10006; Nicht eingeloggt';
+  }
+}
+
+async function openLoginWindow() {
+  toast('Login-Fenster wird geoeffnet ...');
+  try {
+    const data = await apiJSON('/api/login-window', {method:'POST'});
+    if (!data.ok) toast('Fehler: ' + data.error);
+  } catch(e) { toast('Netzwerkfehler'); }
+}
+
+async function forgetCookie() {
+  try { await api('/api/cookie/forget', {method:'POST'}); document.getElementById('cookieInput').value = ''; updateCookieStatus({ok: false}); toast('Cookie geloescht'); }
+  catch(e) { toast('Fehler beim Loeschen'); }
+}
+
+// Check cookie status on load
+async function checkCookieStatus() {
+  try {
+    const cfg = await apiJSON('/api/settings');
+    const hasCookie = cfg.has_cookie === true;
+    const warning = document.getElementById('cookieWarning');
+    if (hasCookie) {
+      updateCookieStatus({ok: true});
+      if (warning) warning.style.display = 'none';
+    } else {
+      updateCookieStatus({ok: false});
+      if (warning) warning.style.display = 'block';
+    }
+  } catch(e) { console.error('cookie status check failed', e); }
+}
+checkCookieStatus();
+</script>
+</body>
+</html>
