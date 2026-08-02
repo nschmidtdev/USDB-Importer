@@ -24,9 +24,23 @@ import webview
 
 USDB_LOGIN_URL = "https://usdb.animux.de/?link=login"
 USDB_HOST = "usdb.animux.de"
-FLASK_API = "http://127.0.0.1:5776/api/cookie/from-browser"
+FLASK_API = f"http://127.0.0.1:{os.environ.get('USDB_PORT', '5776')}/api/cookie/transfer"
 
-LOG_FILE = Path(__file__).parent / "data" / "login_window.log"
+if getattr(sys, "frozen", False):
+    _BASE = Path(sys.executable).parent
+else:
+    _BASE = Path(__file__).parent
+
+if sys.platform == "win32":
+    _appdata = os.environ.get("LOCALAPPDATA") or os.environ.get("APPDATA")
+    _DATA_BASE = Path(_appdata) / "UltraStarImporter" if _appdata else _BASE
+elif sys.platform == "darwin":
+    _DATA_BASE = Path.home() / "Library" / "Application Support" / "UltraStarImporter"
+else:
+    _xdg = os.environ.get("XDG_DATA_HOME")
+    _DATA_BASE = Path(_xdg) / "UltraStarImporter" if _xdg else Path.home() / ".local" / "share" / "UltraStarImporter"
+
+LOG_FILE = _DATA_BASE / "login_window.log"
 LOG_FILE.parent.mkdir(exist_ok=True)
 
 # Lock to ensure cookies are only exported once per session
@@ -237,7 +251,7 @@ def inject_button(window):
                 if (document.getElementById('usdb-grab-btn')) return;
                 var btn = document.createElement('button');
                 btn.id = 'usdb-grab-btn';
-                btn.textContent = '\\\\u2705 Fertig eingeloggt? Cookies \\\\u00fcbernehmen';
+                btn.textContent = '\\u2705 Fertig eingeloggt? Cookies \\u00fcbernehmen';
                 btn.style.cssText = 'position:fixed!important;bottom:20px!important;right:20px!important;'
                     + 'z-index:999999!important;padding:14px 28px!important;font-size:16px!important;'
                     + 'background:#f59e0b!important;color:#000!important;border:none!important;'
@@ -248,7 +262,7 @@ def inject_button(window):
                 style.textContent = '@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}';
                 document.head.appendChild(style);
                 btn.onclick = function() {
-                    btn.textContent = '\\\\u23f3 Uebernehme Cookies ...';
+                    btn.textContent = '\\u23f3 Uebernehme Cookies ...';
                     btn.style.background = '#3b82f6';
                     pywebview.api.grab();
                 };
@@ -292,7 +306,7 @@ class JsBridge:
                     (function() {
                         var btn = document.getElementById('usdb-grab-btn');
                         if (btn) {
-                            btn.textContent = '\\\\u274c Fehler - erneut versuchen';
+                            btn.textContent = '\\u274c Fehler - erneut versuchen';
                             btn.style.background = '#ef4444';
                         }
                     })();
@@ -334,14 +348,12 @@ def check_and_grab(window):
         log(f"check_and_grab error: {e}")
 
 
-def main():
+def create_login_window(transfer_token):
+    """Create a login window inside an already running pywebview loop."""
     global TRANSFER_TOKEN
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--transfer-token", required=True, help=argparse.SUPPRESS)
-    TRANSFER_TOKEN = parser.parse_args().transfer_token
+    TRANSFER_TOKEN = transfer_token
     log("=" * 50)
     log("Login-Fenster wird geoeffnet ...")
-
     window = webview.create_window(
         "USDB Login - Song Importer",
         USDB_LOGIN_URL,
@@ -350,9 +362,22 @@ def main():
         js_api=JsBridge(),
     )
     window.events.loaded += lambda: on_loaded(window)
-
     log("Fenster erstellt. Warte auf Login ...")
+    return window
 
+
+def run_login_window():
+    """Run a standalone login process with its own pywebview loop."""
+    create_login_window(os.environ.get("USDB_TRANSFER_TOKEN", ""))
+    webview.start()
+    log("Login-Fenster geschlossen.")
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--transfer-token", required=True, help=argparse.SUPPRESS)
+    token = parser.parse_args().transfer_token
+    create_login_window(token)
     webview.start()
     log("Login-Fenster geschlossen.")
 

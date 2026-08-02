@@ -104,6 +104,225 @@ class TestDelayValidation:
         assert err is not None
 
 
+class TestProxySecurity:
+    def test_proxy_strips_remote_scripts_and_event_handlers(self):
+        client = app.app.test_client()
+        class Response:
+            text = (
+                '<html><head><base href="https://evil.example/">'
+                '<meta http-equiv="refresh" content="0;url=/api/settings"></head>'
+                '<body onload="alert(1)">'
+                '<script>alert("remote")</script>'
+                '<iframe src="/api/settings"></iframe>'
+                '<object data="/api/settings"></object>'
+                '<a href="javascript:alert(2)">bad</a>'
+                '<img src="cover.jpg" onerror="alert(3)">'
+                '</body></html>'
+            )
+
+        with patch.object(app, "get_cookie", return_value="PHPSESSID=valid-session"), \
+             patch.object(app.req_lib, "get", return_value=Response()):
+            response = client.get("/proxy?link=browse")
+
+        body = response.get_data(as_text=True)
+        assert response.status_code == 200
+        assert 'alert("remote")' not in body
+        assert "onload=" not in body
+        assert "onerror=" not in body
+        assert "javascript:" not in body
+        assert "<base" not in body
+        assert "<iframe" not in body
+        assert "<object" not in body
+        assert "http-equiv" not in body
+        assert "object-src 'none'" in response.headers["Content-Security-Policy"]
+        # The application-owned enhancement script must remain available.
+        assert "usdb-proxy-queue-btn" in body
+
+
+class TestOutputPathSecurity:
+    def test_cover_rejects_parent_directory_traversal(self, tmp_path):
+        client = app.app.test_client()
+        output = tmp_path / "output"
+        outside = tmp_path / "outside"
+        output.mkdir()
+        outside.mkdir()
+        (outside / "Artist - Song [CO].jpg").write_bytes(b"not-a-real-image")
+
+        old_output = app.state.config.get("output_path", "")
+        app.state.config["output_path"] = str(output)
+        try:
+            response = client.get("/api/output/cover", query_string={"folder": "../outside"})
+        finally:
+            app.state.config["output_path"] = old_output
+
+        assert response.status_code == 400
+
+
+class TestServerSecurity:
+    def test_server_mode_requires_basic_auth(self):
+        client = app.app.test_client()
+        env = {
+            "USDB_SERVER_MODE": "1",
+            "USDB_USERNAME": "admin",
+            "USDB_PASSWORD": "correct-horse",
+        }
+        with patch.dict(os.environ, env, clear=False):
+            health = client.get("/health")
+            denied = client.get("/")
+            allowed = client.get("/", headers={"Authorization": "Basic YWRtaW46Y29ycmVjdC1ob3JzZQ=="})
+
+        assert health.status_code == 200
+        assert health.get_json() == {"ok": True, "version": "0.1.0"}
+        assert denied.status_code == 401
+        assert allowed.status_code == 200
+
+    def test_remote_same_origin_is_allowed(self):
+        with app.app.test_request_context(
+            "/api/queue/clear",
+            base_url="http://192.168.1.50:5776",
+            headers={"Origin": "http://192.168.1.50:5776"},
+        ):
+            assert app._origin_is_allowed("http://192.168.1.50:5776")
+
+    def test_server_mode_rejects_desktop_login_window(self):
+        client = app.app.test_client()
+        env = {
+            "USDB_SERVER_MODE": "1",
+            "USDB_USERNAME": "admin",
+            "USDB_PASSWORD": "correct-horse",
+        }
+        auth = {"Authorization": "Basic YWRtaW46Y29ycmVjdC1ob3JzZQ=="}
+        with patch.dict(os.environ, env, clear=False):
+            response = client.post("/api/login-window", headers=auth)
+        assert response.status_code == 409
+
+
+class TestCredentials:
+    def test_blank_password_keeps_stored_password(self):
+        client = app.app.test_client()
+        with patch.object(app, "get_login_credentials", return_value=("old-user", "saved-secret")), \
+             patch.object(app, "set_login_credentials") as store:
+            response = client.put(
+                "/api/credentials",
+                json={"username": "new-user", "password": ""},
+            )
+
+        assert response.status_code == 200
+        store.assert_called_once_with("new-user", "saved-secret")
+
+
+class TestCookieRoutes:
+    def test_transfer_and_browser_extraction_use_distinct_routes(self):
+        routes = {(rule.rule, rule.endpoint) for rule in app.app.url_map.iter_rules()}
+        assert ("/api/cookie/transfer", "api_cookie_transfer") in routes
+        assert ("/api/cookie/from-browser", "api_cookie_from_browser_extract") in routes
+        assert sum(rule == "/api/cookie/from-browser" for rule, _ in routes) == 1
+
+
+class TestOutputDeleteSecurity:
+    @pytest.mark.parametrize("folder_name", [".", "./", "nested/song", "nested\\song"])
+    def test_delete_rejects_root_and_non_child_paths(self, tmp_path, monkeypatch, folder_name):
+        output = tmp_path / "output"
+        output.mkdir()
+        (output / "keep.txt").write_text("keep", encoding="utf-8")
+        nested = output / "nested" / "song"
+        nested.mkdir(parents=True)
+        monkeypatch.setitem(app.state.config, "output_path", str(output))
+
+        response = app.app.test_client().post(
+            "/api/output/delete", json={"folder": folder_name}
+        )
+
+        assert response.status_code in {400, 403}
+        assert output.is_dir()
+        assert (output / "keep.txt").is_file()
+        assert nested.is_dir()
+
+
+class TestZipSafety:
+    def test_zip_collection_enforces_source_size_limit(self, tmp_path):
+        (tmp_path / "large.bin").write_bytes(b"1234")
+        with patch.dict(os.environ, {"USDB_ZIP_MAX_BYTES": "3"}, clear=False):
+            with pytest.raises(ValueError, match="ZIP-Limit"):
+                app._collect_zip_files(tmp_path)
+
+    @pytest.mark.parametrize("folder_name", [".", "./", "nested/song", "nested\\song"])
+    def test_zip_folder_rejects_non_child_names(self, tmp_path, monkeypatch, folder_name):
+        output = tmp_path / "output"
+        (output / "nested" / "song").mkdir(parents=True)
+        monkeypatch.setitem(app.state.config, "output_path", str(output))
+        response = app.app.test_client().get(
+            "/api/output/zip-folder", query_string={"folder": folder_name}
+        )
+        assert response.status_code in {400, 403}
+
+
+class TestCredentials:
+    def test_put_preserves_password_whitespace(self, monkeypatch):
+        captured = {}
+
+        def store(username, password):
+            captured["value"] = (username, password)
+
+        monkeypatch.setattr(app, "set_login_credentials", store)
+
+        response = app.app.test_client().put(
+            "/api/credentials",
+            json={"username": " user ", "password": " secret pass "},
+        )
+
+        assert response.status_code == 200
+        assert captured["value"] == ("user", " secret pass ")
+
+    def test_frontend_does_not_trim_password(self):
+        frontend = (Path(app.CODE_DIR) / "static" / "index.html").read_text(encoding="utf-8")
+        assert "const password = document.getElementById('credPass').value;" in frontend
+
+
+class TestCacheConcurrency:
+    def test_clear_cache_uses_cache_lock(self, tmp_path, monkeypatch):
+        class TrackingLock:
+            entered = False
+
+            def __enter__(self):
+                self.entered = True
+
+            def __exit__(self, *args):
+                return False
+
+        lock = TrackingLock()
+        (tmp_path / "usdb_cache.json").write_text("{}", encoding="utf-8")
+        monkeypatch.setattr(app, "DATA_DIR", tmp_path)
+        monkeypatch.setattr(app.state, "cache_lock", lock)
+        app.state.usdb_cache = {"42": {"artist": "A"}}
+
+        response = app.app.test_client().post("/api/data/clear-cache")
+
+        assert response.status_code == 200
+        assert lock.entered is True
+        assert app.state.usdb_cache == {}
+
+
+class TestAssetRepair:
+    def test_mp3_patch_adds_missing_header(self, tmp_path):
+        txt = tmp_path / "song.txt"
+        txt.write_text("#ARTIST:A\n#TITLE:T\nE", encoding="utf-8")
+
+        app._patch_txt_mp3(txt, "A - T.mp3")
+
+        assert "#MP3:A - T.mp3" in txt.read_text(encoding="utf-8").splitlines()
+
+    def test_frontend_parses_asset_repair_json(self):
+        frontend = (Path(app.CODE_DIR) / "static" / "index.html").read_text(encoding="utf-8")
+        assert "await apiJSON('/api/output/fix-assets'" in frontend
+        assert "await apiJSON('/api/output/fix-covers'" in frontend
+
+    def test_preview_button_avoids_inline_javascript_with_folder_name(self):
+        frontend = (Path(app.CODE_DIR) / "static" / "index.html").read_text(encoding="utf-8")
+        assert 'onclick="togglePreview' not in frontend
+        assert "previewButton.addEventListener('click'" in frontend
+
+
 class TestNormalize:
     """normalize() must be accent-insensitive."""
 
@@ -169,7 +388,11 @@ class TestBuildSongFolder:
         folder = app.build_song_folder(data, txt, cover, str(tmp_path))
         p = Path(folder)
         assert p.exists()
-        assert len(list(p.glob("*.txt"))) == 1
+        # UltraStar scans every *.txt file, so the auxiliary links file must
+        # deliberately have no .txt suffix.
+        txt_files = list(p.glob("*.txt"))
+        assert len(txt_files) == 1
+        assert (p / "_links").exists()
 
     def test_without_cover(self, tmp_path):
         data = {"artist": "Adele", "title": "Hello", "usdb_id": "1"}
@@ -239,3 +462,33 @@ class TestOutputTransaction:
 
 def test_normalize_real_accent():
     assert app.normalize("café") == app.normalize("cafe")
+
+
+def test_health_reports_project_version():
+    with app.app.test_client() as client:
+        response = client.get("/health")
+    assert response.status_code == 200
+    assert response.get_json() == {"ok": True, "version": "0.1.0"}
+
+
+@pytest.mark.parametrize(
+    ("slug", "marker"),
+    [
+        ("license", b"GNU GENERAL PUBLIC LICENSE"),
+        ("disclaimer", "Eigenverantwortliche Nutzung".encode()),
+        ("third-party-notices", b"Third-party notices"),
+        ("third-party-licenses", b"Flask"),
+    ],
+)
+def test_legal_documents_are_served(slug, marker):
+    with app.app.test_client() as client:
+        response = client.get(f"/legal/{slug}")
+    assert response.status_code == 200
+    assert marker in response.data
+    assert response.headers["Content-Type"].startswith("text/plain")
+
+
+def test_unknown_legal_document_is_not_served():
+    with app.app.test_client() as client:
+        response = client.get("/legal/../../config.json")
+    assert response.status_code == 404

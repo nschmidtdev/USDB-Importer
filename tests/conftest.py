@@ -8,6 +8,8 @@ from pathlib import Path
 import pytest
 
 PROJECT_DIR = Path(__file__).parent.parent
+# src/ layout: modules live in src/
+sys.path.insert(0, str(PROJECT_DIR / "src"))
 sys.path.insert(0, str(PROJECT_DIR))
 os.chdir(PROJECT_DIR)
 

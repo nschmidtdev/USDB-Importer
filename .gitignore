@@ -1,11 +1,15 @@
 config.json
-data/*.json
-data/*.log
+data/
 output/
 __pycache__/
 *.py[cod]
 .pytest_cache/
 .venv/
+build/
+dist/
+release/
+.env
+*.spec.bak
 .idea/
 .hermes/
 test_local.json

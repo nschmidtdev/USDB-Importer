@@ -1,0 +1,51 @@
+name: Fehlerbericht
+description: Reproduzierbaren Fehler melden
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Keine Cookies, Passwörter, Medien oder personenbezogenen Daten hochladen.
+        Sicherheitslücken bitte privat gemäß SECURITY.md melden.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "0.1.0 oder Commit-ID"
+    validations:
+      required: true
+  - type: dropdown
+    id: mode
+    attributes:
+      label: Betriebsart
+      options:
+        - Windows-EXE
+        - Python-Quellcode
+        - Docker
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduktion
+      description: Welche minimalen Schritte lösen den Fehler aus?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Erwartetes Verhalten
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Tatsächliches Verhalten
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Bereinigte Logs
+      render: text

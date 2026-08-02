@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+.idea
+.hermes
+__pycache__
+.pytest_cache
+build
+dist
+output
+data
+*.py[cod]
+*.log
+config.json

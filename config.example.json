@@ -1,6 +1,17 @@
 {
-  "cookie": "",
   "local_path": "",
   "delay": 0.5,
-  "output_path": ""
+  "output_path": "",
+  "download_video": true,
+  "collision_policy": "skip",
+  "audio_format": "mp3",
+  "audio_bitrate": 192,
+  "audio_normalize": false,
+  "audio_normalize_strength": "loudnorm",
+  "video_resolution": 1080,
+  "video_format": "mp4",
+  "cover_resize": 0,
+  "cover_autofix": false,
+  "use_meta_tags": true,
+  "max_workers": 1
 }

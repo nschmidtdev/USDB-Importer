@@ -1,0 +1,28 @@
+services:
+  ultrastar-importer:
+    build: .
+    image: ultrastar-importer:0.1.0
+    container_name: ultrastar-importer
+    restart: unless-stopped
+    init: true
+    read_only: true
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 256
+    stop_grace_period: 30s
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    ports:
+      - "${USDB_BIND_ADDRESS:-127.0.0.1}:5776:5776"
+    volumes:
+      - ./output:/app/output
+      - ./data:/app/data
+    environment:
+      USDB_HOST: 0.0.0.0
+      USDB_PORT: 5776
+      USDB_OUTPUT_PATH: /app/output
+      USDB_MAX_SSE_CLIENTS: 16
+      USDB_USERNAME: ${USDB_USERNAME:?USDB_USERNAME in .env setzen}
+      USDB_PASSWORD: ${USDB_PASSWORD:?USDB_PASSWORD in .env setzen}
