@@ -17,6 +17,8 @@ jobs:
     name: Windows tests and package
     runs-on: windows-latest
     timeout-minutes: 30
+    outputs:
+      artifact-name: ${{ steps.package.outputs.artifact-name }}
 
     steps:
       - name: Check out source
@@ -47,16 +49,29 @@ jobs:
         run: python -m PyInstaller --clean --noconfirm ultrastar-importer.spec
 
       - name: Validate and package release files
+        id: package
         shell: python
         run: |
+          import os
           from hashlib import sha256
           from pathlib import Path
           from zipfile import ZIP_DEFLATED, ZipFile
 
+          version_scope = {}
+          exec(Path("src/version.py").read_text(encoding="utf-8"), version_scope)
+          version = version_scope["__version__"]
+
           exe = Path("dist/UltraStarImporter.exe")
-          assert exe.is_file(), "EXE fehlt"
+          assert exe.is_file(), "EXE missing"
           size = exe.stat().st_size
-          assert size < 25 * 1024 * 1024, f"EXE zu groß: {size / 1024 / 1024:.2f} MiB"
+          assert size < 25 * 1024 * 1024, f"EXE too large: {size / 1024 / 1024:.2f} MiB"
+
+          if os.environ.get("GITHUB_REF_TYPE") == "tag":
+              expected_tag = f"v{version}"
+              actual_tag = os.environ["GITHUB_REF_NAME"]
+              assert actual_tag == expected_tag, (
+                  f"Tag {actual_tag!r} does not match project version {expected_tag!r}"
+              )
 
           files = [
               exe,
@@ -65,11 +80,12 @@ jobs:
               Path("THIRD_PARTY_NOTICES.md"),
               Path("THIRD_PARTY_LICENSES.txt"),
           ]
-          assert all(path.is_file() for path in files), "Release-Rechtstexte fehlen"
+          assert all(path.is_file() for path in files), "Release legal files missing"
 
           release = Path("release")
           release.mkdir(exist_ok=True)
-          archive = release / "UltraStarImporter-0.1.0-windows-x64.zip"
+          artifact_name = f"UltraStarImporter-{version}-windows-x64"
+          archive = release / f"{artifact_name}.zip"
           with ZipFile(archive, "w", ZIP_DEFLATED) as bundle:
               for path in files:
                   bundle.write(path, path.name)
@@ -78,16 +94,18 @@ jobs:
           (release / f"{archive.name}.sha256").write_text(
               f"{digest}  {archive.name}\n", encoding="ascii"
           )
+          with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
+              print(f"artifact-name={artifact_name}", file=output)
           print(f"EXE: {size / 1024 / 1024:.2f} MiB")
           print(f"ZIP SHA-256: {digest}")
 
       - name: Upload Windows release candidate
         uses: actions/upload-artifact@v4
         with:
-          name: UltraStarImporter-0.1.0-windows-x64
+          name: ${{ steps.package.outputs.artifact-name }}
           path: |
-            release/UltraStarImporter-0.1.0-windows-x64.zip
-            release/UltraStarImporter-0.1.0-windows-x64.zip.sha256
+            release/${{ steps.package.outputs.artifact-name }}.zip
+            release/${{ steps.package.outputs.artifact-name }}.zip.sha256
           if-no-files-found: error
           retention-days: 14
 
@@ -136,3 +154,39 @@ jobs:
       - name: Stop container
         if: always()
         run: docker rm --force ultrastar-importer-ci || true
+
+  publish-release:
+    name: Publish GitHub release
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    needs:
+      - windows-test-and-package
+      - docker-smoke-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download verified Windows artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.windows-test-and-package.outputs.artifact-name }}
+          path: release
+
+      - name: Create or update GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          test -f "release/${{ needs.windows-test-and-package.outputs.artifact-name }}.zip"
+          test -f "release/${{ needs.windows-test-and-package.outputs.artifact-name }}.zip.sha256"
+
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" release/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" release/* \
+              --verify-tag \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes
+          fi

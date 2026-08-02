@@ -248,6 +248,8 @@ Windows-EXE bauen:
 
 Der Build erzeugt `dist/UltraStarImporter.exe`; CI erzwingt eine Obergrenze von
 25 MiB und paketiert EXE, Lizenz, Disclaimer und Drittanbieterhinweise zusammen.
+Pushes und Pull Requests erhalten ein temporäres Actions-Artefakt; ein passender
+`v*`-Tag veröffentlicht ZIP und SHA-256-Prüfsumme zusätzlich als GitHub-Release-Assets.
 
 Weitere Details stehen in [CONTRIBUTING.md](CONTRIBUTING.md) und
 [docs/RELEASING.md](docs/RELEASING.md).

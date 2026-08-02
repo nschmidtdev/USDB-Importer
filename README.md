@@ -241,7 +241,9 @@ Build the Windows EXE:
 ```
 
 The build creates `dist/UltraStarImporter.exe`. CI enforces a 25 MiB size limit
-and packages the EXE with the license, disclaimer, and third-party notices.
+and packages the EXE with the license, disclaimer, and third-party notices. Pushes
+and pull requests receive a temporary Actions artifact; a matching `v*` tag also
+publishes the ZIP and its SHA-256 checksum as GitHub Release assets.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and
 [docs/RELEASING.md](docs/RELEASING.md) for more details.

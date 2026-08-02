@@ -31,9 +31,15 @@ sauberen Windows-System mit installierter WebView2 Runtime und FFmpeg.
 
 1. `src/version.py` aktualisieren.
 2. `CHANGELOG.md` von `Unreleased` in die neue Version überführen.
-3. Tag im Format `vMAJOR.MINOR.PATCH` erstellen.
-4. Das von GitHub Actions erzeugte Windows-ZIP als Release-Asset verwenden.
-5. Release Notes aus dem Changelog übernehmen.
+3. Tag im Format `vMAJOR.MINOR.PATCH` erstellen. Der Tag muss exakt zur Version
+   in `src/version.py` passen.
+4. Den Tag zu GitHub pushen. GitHub Actions führt Windows-Tests, EXE-Paketierung
+   und den Docker-Smoke-Test aus.
+5. Nach grünen Qualitätsgates erstellt die Pipeline das GitHub Release automatisch
+   und hängt Windows-ZIP sowie SHA-256-Prüfsumme an. Die automatisch erzeugten
+   Quellcodearchive bleiben am selben Release verfügbar.
+6. Die automatisch erzeugten Release Notes bei Bedarf anhand des Changelogs
+   ergänzen.
 
 Das Docker-Image darf nicht als öffentlich erreichbarer Dienst beworben werden.
 Für LAN-/Internetbetrieb ist ein HTTPS-Reverse-Proxy erforderlich.
