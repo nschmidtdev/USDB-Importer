@@ -1,3 +1,5 @@
+**English** | [Deutsch](README.de.md)
+
 # UltraStar Importer
 
 ![License: GPL-3.0-only](https://img.shields.io/badge/license-GPL--3.0--only-blue.svg)
@@ -5,42 +7,64 @@
 ![Platform](https://img.shields.io/badge/Desktop-Windows-0078D4.svg)
 ![Status](https://img.shields.io/badge/status-beta-orange.svg)
 
-Ein lokaler, quelloffener Importer für UltraStar-Songs aus der
-[USDB](https://usdb.animux.de/). Er lädt Song-Metadaten und UltraStar-TXT-Dateien,
-sucht passende YouTube-Medien und erzeugt vollständige, NAS-taugliche Songordner.
+A local, open source importer for UltraStar songs from
+[USDB](https://usdb.animux.de/). It downloads song metadata and UltraStar TXT
+files, finds matching media on YouTube, and creates complete song folders that
+work on local disks and network shares.
 
 > [!WARNING]
-> **Eigenverantwortliche Nutzung:** Verwende das Tool ausschließlich für
-> Inhalte, die du herunterladen und nutzen darfst. Das Projekt liefert keine
-> Medien mit, räumt keine Rechte an Inhalten Dritter ein und übernimmt keine
-> Gewährleistung für Datenverlust, Kontosperren oder Rechtsverletzungen. Lies
-> den vollständigen [Haftungs- und Nutzungshinweis](DISCLAIMER.md).
+> **Use at your own risk:** Only download and use content when you have the right
+> to do so. This project does not include media, grant rights to third-party
+> content, or accept liability for data loss, account suspension, or copyright
+> infringement. Read the full [disclaimer and usage notice](DISCLAIMER.md).
 
-UltraStar Importer ist ein **unabhängiges, inoffizielles Projekt** und steht in
-keiner Verbindung zu USDB, Animux, YouTube, Google oder UltraStar Deluxe.
+UltraStar Importer is an **independent, unofficial project**. It is not affiliated
+with USDB, Animux, YouTube, Google, or UltraStar Deluxe.
 
 ## Status
 
-Die aktuelle öffentliche Zielversion ist **0.1.0 (Beta)**. Der Kernworkflow ist
-automatisiert getestet, dennoch können Änderungen an USDB oder YouTube einzelne
-Funktionen jederzeit beeinträchtigen. Vor einem großen Import sind Backups des
-Zielordners empfohlen.
+The current public target release is **0.1.0 (Beta)**. Automated tests cover the
+main workflow, but changes to USDB or YouTube can still break individual
+features. Back up the destination folder before running a large import.
 
-## Funktionen
+## Features
 
-- **USDB-Import:** Metadaten, UltraStar-TXT und Cover
-- **YouTube-Medien:** Suche sowie Audio-/Video-Download über yt-dlp
-- **Qualität:** Audioformat und Bitrate, Videoformat und Maximalauflösung
-- **Nachbearbeitung:** EBU-R128-Normalisierung und Audio-Tags
-- **Cover-Verarbeitung:** Größenlimit, Rotation und Auto-Kontrast
-- **Bibliothek:** vorhandene Songordner scannen und fehlende Assets reparieren
-- **Queue:** sequenzielle oder parallele Verarbeitung mit Live-Fortschritt
-- **Sicherheit:** Credential Store, Same-Origin-Schutz, Proxy-Sanitizing,
-  Pfadgrenzen und atomare Schreibvorgänge
-- **NAS/SMB:** transaktionale Staging-Ordner und SMB-verträgliche Moves
-- **Zwei Betriebsarten:** native Windows-App oder authentisierter Docker-Server
+- **USDB import:** metadata, UltraStar TXT files, and cover art
+- **YouTube media:** search and audio/video downloads through yt-dlp
+- **Quality controls:** audio format and bitrate, video format and maximum resolution
+- **Post-processing:** EBU R128 loudness normalization and audio tags
+- **Cover processing:** size limits, rotation, and automatic contrast correction
+- **Library tools:** scan existing song folders and repair missing assets
+- **Queue:** sequential or parallel processing with live progress
+- **Security:** OS credential storage, same-origin checks, proxy sanitizing,
+  path boundaries, and atomic writes
+- **NAS/SMB support:** transactional staging folders and SMB-safe moves
+- **Two run modes:** native Windows app or authenticated Docker server
 
-Ein fertiger Songordner sieht beispielsweise so aus:
+## Screenshots
+
+### Browse USDB inside the app
+
+The integrated, sanitized USDB view lets you search without switching between
+the app and a browser. Song detail pages can be added directly to the queue.
+
+![Integrated USDB search in UltraStar Importer](docs/images/Suche.png)
+
+### Manage imports in the queue
+
+Add multiple USDB links at once. Status cards and live progress show what each
+import is doing.
+
+![Song queue with status overview and worker controls](docs/images/Queue.png)
+
+### Configure the session and automatic login
+
+The settings page handles browser login, saved login details, and the output
+folder. Secrets are kept out of the regular project configuration.
+
+![USDB session and automatic login settings](docs/images/Cookie.png)
+
+A completed song folder looks like this:
 
 ```text
 Songs/
@@ -52,30 +76,29 @@ Songs/
     └── _links
 ```
 
-`_links` besitzt absichtlich keine `.txt`-Endung, da UltraStar alle TXT-Dateien
-im Songordner als Songdefinition interpretiert.
+`_links` intentionally has no `.txt` extension because UltraStar treats every
+TXT file in a song folder as a song definition.
 
-## Voraussetzungen
+## Requirements
 
-### Windows-Desktop
+### Windows desktop
 
-- Windows 10 oder neuer
+- Windows 10 or newer
 - Microsoft Edge WebView2 Runtime
-- [FFmpeg](https://ffmpeg.org/download.html) im `PATH`
+- [FFmpeg](https://ffmpeg.org/download.html) available on `PATH`
 
-Die Release-EXE enthält Python und die Python-Abhängigkeiten, **aber kein
-FFmpeg-Binary**.
+The release EXE includes Python and its Python dependencies, **but it does not
+include an FFmpeg binary**.
 
-### Aus dem Quellcode
+### Running from source
 
 - Python 3.12
-- FFmpeg im `PATH`
+- FFmpeg available on `PATH`
 - Git
 
-## Installation aus dem Quellcode
+## Install from source
 
-Das Repository über GitHub herunterladen oder klonen und anschließend in den
-Projektordner wechseln:
+Download or clone the repository from GitHub, then open the project directory:
 
 ```bash
 cd ultrastar-importer
@@ -89,123 +112,121 @@ Windows:
 .venv\Scripts\python main.py
 ```
 
-Linux/macOS können den Headless-Server verwenden; die pywebview-Desktop-App ist
-in diesem Projekt nur für Windows paketiert.
+Linux and macOS can run the headless server. This project packages the pywebview
+desktop app for Windows only.
 
-## Verwendung der Desktop-App
+## Use the desktop app
 
-1. Unter **Einstellungen → Browser-Login** bei USDB anmelden.
-2. Einen Output-Ordner auswählen.
-3. USDB-Detail-URLs oder numerische Song-IDs in die Queue einfügen.
-4. Gewünschte Audio-/Videoqualität und Workerzahl konfigurieren.
-5. Queue starten und den Fortschritt beobachten.
-6. Ergebnisse im Reiter **Bibliothek** prüfen oder reparieren.
+1. Open **Settings → Browser login** and sign in to USDB.
+2. Select an output folder.
+3. Add USDB detail URLs or numeric song IDs to the queue.
+4. Choose the audio/video quality and worker count.
+5. Start the queue and follow the progress.
+6. Check or repair the results from the **Library** tab.
 
-USDB-Sitzung und optionale Login-Daten werden unter Windows über den Credential
-Manager gespeichert. Die normale `config.json` enthält keine Cookies oder
-Passwörter.
+On Windows, UltraStar Importer stores the USDB session and optional login details
+in the Windows Credential Manager. The regular `config.json` contains no cookies
+or passwords.
 
-## Docker / Headless-Server
+## Docker / headless server
 
 > [!CAUTION]
-> Der Server ist für lokalen oder kontrollierten privaten Betrieb gedacht.
-> **Keine direkte Portweiterleitung ins Internet.** HTTP Basic Auth verschlüsselt
-> keine Zugangsdaten und muss außerhalb des lokalen Rechners hinter einem
-> HTTPS-Reverse-Proxy betrieben werden.
+> The server is intended for local or controlled private use.
+> **Do not forward its port directly to the internet.** HTTP Basic Auth does not
+> encrypt credentials. Outside the local machine, run the server behind a
+> correctly configured HTTPS reverse proxy.
 
-Konfiguration und beschreibbare Host-Verzeichnisse anlegen:
+Create the configuration and writable host directories:
 
 ```bash
 cp .env.example .env
 mkdir -p data output
 ```
 
-Anschließend `USDB_USERNAME` und `USDB_PASSWORD` in `.env` durch eigene, starke
-Werte ersetzen und starten:
+Replace `USDB_USERNAME` and `USDB_PASSWORD` in `.env` with your own strong values,
+then start the server:
 
 ```bash
 docker compose up --build -d
 ```
 
-Die Oberfläche ist danach unter <http://127.0.0.1:5776> erreichbar. `/health`
-ist absichtlich ohne Authentisierung erreichbar und gibt ausschließlich einen
-minimalen Status zurück.
+The web interface is available at <http://127.0.0.1:5776>. `/health` is
+intentionally available without authentication and returns only minimal status
+information.
 
-Persistente Verzeichnisse:
+Persistent directories:
 
 ```text
 ./data    -> /app/data
 ./output  -> /app/output
 ```
 
-Der Compose-Standard bindet nur an `127.0.0.1`. Für einen LAN-Zugriff darf
-`USDB_BIND_ADDRESS=0.0.0.0` ausschließlich zusammen mit einem korrekt
-konfigurierten HTTPS-Reverse-Proxy gesetzt werden.
+By default, Compose binds the server to `127.0.0.1` only. Set
+`USDB_BIND_ADDRESS=0.0.0.0` for LAN access only when a correctly configured HTTPS
+reverse proxy protects the server.
 
 ### Docker Engine in WSL2
 
-Docker Desktop ist nicht erforderlich. Mit einer Docker Engine in WSL2:
+Docker Desktop is not required. To use a Docker Engine running in WSL2:
 
 ```bash
 wsl.exe -d Ubuntu-24.04 -- bash -lc \
-  'cd /mnt/d/PFAD/ZUM/ultrastar-importer && docker compose up --build -d'
+  'cd /mnt/d/PATH/TO/ultrastar-importer && docker compose up --build -d'
 ```
 
-## Daten und Datenschutz
+## Data and privacy
 
-Desktop-Daten liegen standardmäßig hier:
+Desktop data is stored here by default:
 
 ```text
 %LOCALAPPDATA%\UltraStarImporter
 ```
 
-Dazu können Konfiguration, Cache und Logs gehören. Fertige Songs liegen im
-gewählten Output-Ordner. Folgende Inhalte dürfen niemals in Issues oder Commits
-hochgeladen werden:
+This directory may contain configuration, cache files, and logs. Completed songs
+are stored in the selected output folder. Never upload the following to issues
+or commits:
 
-- Cookies und Zugangsdaten
-- `config.json`, `server-secrets.json` oder `.env`
-- Logs mit personenbezogenen Daten
-- heruntergeladene Songs, Covers, Audio- oder Videodateien
+- cookies or credentials
+- `config.json`, `server-secrets.json`, or `.env`
+- logs containing personal data
+- downloaded songs, covers, audio, or video files
 
-## Sicherheit
+## Security
 
-- Schreibende lokale APIs prüfen die erlaubte Origin.
-- Der Servermodus verlangt HTTP Basic Auth; `/health` ist die einzige Ausnahme.
-- Externe USDB-Seiten werden vor der Anzeige sanitisiert und mit einer CSP
-  versehen.
-- Datei- und ZIP-Operationen validieren kanonische Pfade und Größenlimits.
-- Konfiguration, Secrets und Cache werden atomar geschrieben.
-- Volle oder langsame SSE-Clients werden begrenzt und getrennt.
-- Downloads entstehen zunächst in Staging-Verzeichnissen; unvollständige
-  Importe werden bereinigt.
+- Local APIs that change state validate the request origin.
+- Server mode requires HTTP Basic Auth; `/health` is the only exception.
+- External USDB pages are sanitized and receive a CSP before display.
+- File and ZIP operations validate canonical paths and size limits.
+- Configuration, secrets, and cache files use atomic writes.
+- Full or slow SSE clients are rate-limited and disconnected.
+- Downloads use staging directories; incomplete imports are cleaned up.
 
-Sicherheitsprobleme bitte gemäß [SECURITY.md](SECURITY.md) privat melden.
+Report security issues privately as described in [SECURITY.md](SECURITY.md).
 
-## Architektur
+## Architecture
 
 ```text
-main.py                     Windows-/pywebview-Entry-Point
-server.py                   Docker-/Headless-Entry-Point
-src/app.py                  Flask-API, Proxy und SSE
-src/worker.py               Queue und Importpipeline
-src/usdb.py                 USDB-Parsing und Downloads
-src/youtube.py              yt-dlp-Integration
-src/songs.py                Song-TXT und transaktionale Ordner
-src/config.py               Pfade, Konfiguration und Credentials
-static/index.html           lokale Weboberfläche
-tests/                      automatisierte Tests
+main.py                     Windows/pywebview entry point
+server.py                   Docker/headless entry point
+src/app.py                  Flask API, proxy, and SSE
+src/worker.py               Queue and import pipeline
+src/usdb.py                 USDB parsing and downloads
+src/youtube.py              yt-dlp integration
+src/songs.py                Song TXT files and transactional folders
+src/config.py               Paths, configuration, and credentials
+static/index.html           Local web interface
+tests/                      Automated tests
 ```
 
-## Entwicklung und Tests
+## Development and tests
 
-Entwicklungsabhängigkeiten installieren:
+Install development dependencies:
 
 ```bash
 .venv\Scripts\python -m pip install -r requirements-dev.txt
 ```
 
-Tests und Syntaxprüfung:
+Run tests and syntax checks:
 
 ```bash
 set PYTHONPATH=
@@ -213,41 +234,38 @@ set PYTHONPATH=
 .venv\Scripts\python -m compileall -q main.py server.py src usdb_importer.py
 ```
 
-Windows-EXE bauen:
+Build the Windows EXE:
 
 ```bash
 .venv\Scripts\python -m PyInstaller --clean --noconfirm ultrastar-importer.spec
 ```
 
-Der Build erzeugt `dist/UltraStarImporter.exe`; CI erzwingt eine Obergrenze von
-25 MiB und paketiert EXE, Lizenz, Disclaimer und Drittanbieterhinweise zusammen.
+The build creates `dist/UltraStarImporter.exe`. CI enforces a 25 MiB size limit
+and packages the EXE with the license, disclaimer, and third-party notices.
 
-Weitere Details stehen in [CONTRIBUTING.md](CONTRIBUTING.md) und
-[docs/RELEASING.md](docs/RELEASING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) and
+[docs/RELEASING.md](docs/RELEASING.md) for more details.
 
-## Bekannte Grenzen
+## Known limitations
 
-- USDB und YouTube besitzen keine stabilen, von diesem Projekt kontrollierten
-  APIs; Änderungen der Webseiten können Parser oder Login vorübergehend
-  brechen.
-- Das Stoppen wartet gegebenenfalls auf eine bereits laufende externe
-  yt-dlp-/FFmpeg-Operation.
-- Der Docker-Server stellt kein eigenes TLS bereit.
-- Eine automatische inhaltliche Rechteprüfung heruntergeladener Medien ist
-  technisch nicht möglich.
+- USDB and YouTube do not provide stable APIs controlled by this project. Site
+  changes may temporarily break parsers or login.
+- Stopping the queue may wait for an active external yt-dlp or FFmpeg operation.
+- The Docker server does not provide TLS.
+- The application cannot automatically determine whether downloaded media may be
+  used legally.
 
-## Lizenz
+## License
 
 Copyright © 2026 UltraStar Importer contributors.
 
-Dieses Projekt ist freie Software unter der
-[GNU General Public License Version 3, ausschließlich dieser Version
-(GPL-3.0-only)](LICENSE). Du darfst es unter diesen Bedingungen verwenden,
-verändern und weitergeben. Bei der Weitergabe von Binärversionen oder
-modifizierten Fassungen müssen die GPL-Bedingungen und der korrespondierende
-Quellcode eingehalten werden.
+This project is free software licensed under the
+[GNU General Public License Version 3 only (GPL-3.0-only)](LICENSE). You may use,
+modify, and redistribute it under those terms. Distribution of binaries or
+modified versions must comply with the GPL and provide the corresponding source
+code as required by the license.
 
-Die Software kommt **ohne jede Gewährleistung**, soweit gesetzlich zulässig.
-Drittanbieterkomponenten und ihre Lizenztexte sind in
-[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) und
-[THIRD_PARTY_LICENSES.txt](THIRD_PARTY_LICENSES.txt) dokumentiert.
+The software comes **without any warranty** to the extent permitted by law.
+Third-party components and their license texts are documented in
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and
+[THIRD_PARTY_LICENSES.txt](THIRD_PARTY_LICENSES.txt).
