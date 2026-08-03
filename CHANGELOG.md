@@ -6,6 +6,13 @@ und die Versionierung an [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-02
+
+### Added
+
+- Added English, German, Spanish, and Russian user-interface translations.
+- Added automatic language detection and persistent language selection.
+
 ## [0.1.0] - 2026-08-02
 
 ### Added

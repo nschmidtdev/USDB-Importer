@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -132,7 +132,7 @@ body::after {
 .panel-title { font-size: 14px; font-weight:700; margin-bottom: 14px; letter-spacing:-0.2px; }
 
 /* Inputs */
-textarea, input[type="text"], input[type="password"] {
+textarea, input[type="text"], input[type="password"], select {
   width: 100%;
   background: rgba(0,0,0,0.35);
   border: 1px solid var(--border);
@@ -569,16 +569,16 @@ iframe { border-radius: var(--radius); }
       </svg>UltraStar Importer
     </div>
     <div class="nav-item active" id="nav-queue" data-tab="queue" onclick="showTab('queue')">
-      <span class="nav-icon">&#9776;</span> Queue
+      <span class="nav-icon">&#9776;</span> <span data-i18n="nav.queue">Queue</span>
     </div>
     <div class="nav-item" id="nav-settings" data-tab="settings" onclick="showTab('settings')">
-      <span class="nav-icon">&#9881;</span> Einstellungen
+      <span class="nav-icon">&#9881;</span> <span data-i18n="nav.settings">Settings</span>
     </div>
     <div class="nav-item" id="nav-library" data-tab="library" onclick="showTab('library')">
-      <span class="nav-icon">&#128218;</span> Bibliothek
+      <span class="nav-icon">&#128218;</span> <span data-i18n="nav.library">Library</span>
     </div>
     <div class="nav-item" id="nav-search" data-tab="search" onclick="showTab('search')">
-      <span class="nav-icon">&#128269;</span> Suche
+      <span class="nav-icon">&#128269;</span> <span data-i18n="nav.search">Search</span>
     </div>
   </div>
 
@@ -587,48 +587,48 @@ iframe { border-radius: var(--radius); }
 
     <!-- QUEUE TAB -->
     <div id="tab-queue">
-      <h1>Song Queue</h1>
-      <div class="subtitle">USDB-Links einfügen, Worker starten, Live-Status verfolgen.</div>
+      <h1 data-i18n="queue.title">Song Queue</h1>
+      <div class="subtitle" data-i18n="queue.subtitle">Add USDB links, start workers, and follow live progress.</div>
 
       <div class="worker-toggle">
         <div class="worker-dot" id="workerDot"></div>
-        <span id="workerStatus" style="color:var(--text-dim); font-size:13px;">Worker gestoppt</span>
+        <span id="workerStatus" data-i18n="queue.worker_stopped" style="color:var(--text-dim); font-size:13px;">Worker stopped</span>
         <div style="margin-left:auto;">
-          <button class="btn btn-sm" id="btnStart" onclick="startWorker()">Start</button>
-          <button class="btn btn-ghost btn-sm" id="btnStop" onclick="stopWorker()" disabled>Stop</button>
+          <button class="btn btn-sm" id="btnStart" data-i18n="queue.start" onclick="startWorker()">Start</button>
+          <button class="btn btn-ghost btn-sm" id="btnStop" data-i18n="queue.stop" onclick="stopWorker()" disabled>Stop</button>
         </div>
       </div>
 
       <div id="cookieWarning" style="display:none; padding:12px 18px; background:var(--accent-dim); border:1px solid var(--border-active); border-radius:var(--radius-sm); margin-bottom:16px; font-size:13px; color:var(--accent);">
-        &#9888; Kein Cookie aktiv. Bitte zuerst unter <strong>Einstellungen &rarr; Browser-Login</strong> einloggen.
+        <span data-i18n="queue.cookie_warning">⚠ No active session. Sign in under Settings → Browser login first.</span>
       </div>
 
       <div class="stats" id="statsRow">
-        <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label">Total</div></div>
-        <div class="stat-card blue"><div class="stat-num" id="statPending">0</div><div class="stat-label">Pending</div></div>
-        <div class="stat-card"><div class="stat-num" id="statProcessing">0</div><div class="stat-label">Processing</div></div>
-        <div class="stat-card green"><div class="stat-num" id="statDone">0</div><div class="stat-label">Done</div></div>
-        <div class="stat-card red"><div class="stat-num" id="statError">0</div><div class="stat-label">Error</div></div>
+        <div class="stat-card"><div class="stat-num" id="statTotal">0</div><div class="stat-label" data-i18n="queue.total">Total</div></div>
+        <div class="stat-card blue"><div class="stat-num" id="statPending">0</div><div class="stat-label" data-i18n="queue.pending">Pending</div></div>
+        <div class="stat-card"><div class="stat-num" id="statProcessing">0</div><div class="stat-label" data-i18n="queue.processing">Processing</div></div>
+        <div class="stat-card green"><div class="stat-num" id="statDone">0</div><div class="stat-label" data-i18n="queue.done">Done</div></div>
+        <div class="stat-card red"><div class="stat-num" id="statError">0</div><div class="stat-label" data-i18n="queue.error">Error</div></div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Links hinzufügen</div>
-        <textarea id="linkInput" placeholder="Eine USDB-URL pro Zeile, z.B.:&#10;https://usdb.animux.de/index.php?link=detail&id=3045"></textarea>
+        <div class="panel-title" data-i18n="queue.add_links">Add links</div>
+        <textarea id="linkInput" data-i18n-placeholder="queue.links_placeholder" placeholder="One USDB URL per line, for example:&#10;https://usdb.animux.de/index.php?link=detail&id=3045"></textarea>
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="addLinks()">Zur Queue hinzufügen</button>
-          <button class="btn btn-ghost btn-sm" onclick="clearQueue()">Alle entfernen</button>
+          <button class="btn btn-sm" data-i18n="queue.add" onclick="addLinks()">Add to queue</button>
+          <button class="btn btn-ghost btn-sm" data-i18n="queue.clear" onclick="clearQueue()">Remove all</button>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Warteschlange</div>
+        <div class="panel-title" data-i18n="queue.heading">Queue</div>
         <table class="queue-table">
           <thead>
             <tr>
               <th style="width:40px">#</th>
-              <th>Song</th>
-              <th style="width:120px">Status</th>
-              <th>Progress</th>
+              <th data-i18n="queue.column_song">Song</th>
+              <th style="width:120px" data-i18n="queue.column_status">Status</th>
+              <th data-i18n="queue.column_progress">Progress</th>
               <th style="width:80px">YT</th>
               <th style="width:30px"></th>
             </tr>
@@ -636,107 +636,115 @@ iframe { border-radius: var(--radius); }
           <tbody id="queueBody"></tbody>
         </table>
         <div id="queueEmpty" style="color:var(--text-dim); text-align:center; padding:24px; font-size:13px;">
-          Queue ist leer. Fuege Links oben hinzu.
+          <span data-i18n="queue.empty">The queue is empty. Add links above.</span>
         </div>
       </div>
     </div>
 
     <!-- SETTINGS TAB -->
     <div id="tab-settings" style="display:none;">
-      <h1>Einstellungen</h1>
-      <div class="subtitle">Cookie und Pfade verwalten.</div>
+      <h1 data-i18n="settings.title">Settings</h1>
+      <div class="subtitle" data-i18n="settings.subtitle">Manage sessions, paths, and application preferences.</div>
 
       <div class="panel">
-        <div class="panel-title">USDB Session</div>
+        <div class="panel-title" data-i18n="settings.language">Language</div>
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;" data-i18n="settings.language_help">Automatic follows the Windows or browser language.</p>
+        <select id="languageSelect" style="max-width:280px;">
+          <option value="auto" data-i18n="language.auto">Automatic</option>
+          <option value="en" data-i18n="language.en">English</option>
+          <option value="de" data-i18n="language.de">German</option>
+          <option value="es" data-i18n="language.es">Spanish</option>
+          <option value="ru" data-i18n="language.ru">Russian</option>
+        </select>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title" data-i18n="settings.session">USDB session</div>
         <div id="cookieStatusBox" style="margin-bottom:14px; padding:12px; border-radius:6px; font-size:13px; display:none;"></div>
         <div class="btn-row" style="margin-top:0;">
-          <button class="btn btn-sm" onclick="openLoginWindow()">&#128274; Browser-Login oeffnen</button>
-          <button class="btn btn-ghost btn-sm" onclick="testCookie()">Cookie testen</button>
-          <button class="btn btn-ghost btn-sm" onclick="forgetCookie()" style="color:var(--red);">Cookie löschen</button>
+          <button class="btn btn-sm" data-i18n="settings.browser_login" onclick="openLoginWindow()">🔒 Open browser login</button>
+          <button class="btn btn-ghost btn-sm" data-i18n="settings.test_cookie" onclick="testCookie()">Test session</button>
+          <button class="btn btn-ghost btn-sm" data-i18n="settings.forget_cookie" onclick="forgetCookie()" style="color:var(--red);">Delete session</button>
         </div>
         <details style="margin-top:14px;">
-          <summary style="font-size:12px; color:var(--text-dim); cursor:pointer;">Cookie manuell eingeben (Erweitert)</summary>
+          <summary style="font-size:12px; color:var(--text-dim); cursor:pointer;" data-i18n="settings.manual_cookie">Enter a cookie manually (advanced)</summary>
           <textarea id="cookieInput" placeholder="PHPSESSID=abc123; ..." style="min-height:60px; margin-top:10px;"></textarea>
           <div class="btn-row">
-            <button class="btn btn-sm" onclick="saveCookie()">Manuell speichern</button>
+            <button class="btn btn-sm" data-i18n="settings.save_manual" onclick="saveCookie()">Save manually</button>
           </div>
         </details>
         <div class="cookie-test-result" id="cookieResult"></div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Auto-Login (Benutzer &amp; Passwort)</div>
-        <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;">
-          Login-Daten speichern. Die Desktop-App nutzt den Windows Credential Manager;
-          der Servermodus eine zugriffsbeschränkte Datei im Datenverzeichnis.
-          Bei Bedarf automatisch bei USDB einloggen.
-        </p>
+        <div class="panel-title" data-i18n="settings.auto_login">Automatic login (username and password)</div>
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;" data-i18n="settings.auto_login_help">Save login details for automatic USDB sign-in. The desktop app uses Windows Credential Manager; server mode uses a protected file in the data directory.</p>
         <div id="credStatus" style="margin-bottom:10px; font-size:13px;"></div>
-        <input type="text" id="credUser" placeholder="USDB-Benutzername" style="margin-bottom:8px;">
-        <input type="password" id="credPass" placeholder="Passwort" style="margin-bottom:8px;">
+        <input type="text" id="credUser" data-i18n-placeholder="settings.username_placeholder" placeholder="USDB username" style="margin-bottom:8px;">
+        <input type="password" id="credPass" data-i18n-placeholder="settings.password_placeholder" placeholder="Password" style="margin-bottom:8px;">
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="saveCredentials()">Speichern</button>
-          <button class="btn btn-sm" onclick="doAutoLogin()" style="background:linear-gradient(135deg, var(--green), #059669); box-shadow:0 2px 8px rgba(16,185,129,0.2);">Auto-Login jetzt</button>
-          <button class="btn btn-ghost btn-sm" onclick="deleteCredentials()" style="color:var(--red);">Löschen</button>
+          <button class="btn btn-sm" data-i18n="common.save" onclick="saveCredentials()">Save</button>
+          <button class="btn btn-sm" data-i18n="settings.auto_login_now" onclick="doAutoLogin()" style="background:linear-gradient(135deg, var(--green), #059669); box-shadow:0 2px 8px rgba(16,185,129,0.2);">Sign in now</button>
+          <button class="btn btn-ghost btn-sm" data-i18n="common.delete" onclick="deleteCredentials()" style="color:var(--red);">Delete</button>
         </div>
         <div id="credResult" style="margin-top:8px; font-size:13px;"></div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Output-Ordner (fertige Songs)</div>
+        <div class="panel-title" data-i18n="settings.output">Output folder (completed songs)</div>
         <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;">
-          Pro Song wird ein Ordner erstellt mit .txt (Lyrics+Timing), Cover, MP3 und Video (via YouTube).
+          <span data-i18n="settings.output_help">Each song gets a folder containing the TXT file, cover, MP3, and video.</span>
         </p>
         <input type="text" id="outputInput" placeholder="D:\UltraStar\Songs">
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="saveOutput()">Speichern</button>
+          <button class="btn btn-sm" data-i18n="common.save" onclick="saveOutput()">Save</button>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Lokaler UltraStar-Ordner</div>
+        <div class="panel-title" data-i18n="settings.local_folder">Local UltraStar folder</div>
         <input type="text" id="pathInput" placeholder="D:\UltraStar\Songs">
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="savePath()">Speichern</button>
+          <button class="btn btn-sm" data-i18n="common.save" onclick="savePath()">Save</button>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Daten-Ordner (Konfiguration, Cache, Logs)</div>
+        <div class="panel-title" data-i18n="settings.data_folder">Data folder (configuration, cache, logs)</div>
         <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;">
-          Wo die App ihre Daten speichert. Aendern erfordert Neustart.
+          <span data-i18n="settings.data_folder_help">Where the app stores its data. Changes require a restart.</span>
         </p>
-        <input type="text" id="dataPathInput" placeholder="Leer = Standard (%LOCALAPPDATA%\UltraStarImporter)">
+        <input type="text" id="dataPathInput" data-i18n-placeholder="settings.data_path_placeholder" placeholder="Empty = default (%LOCALAPPDATA%\UltraStarImporter)">
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="saveDataPath()">Speichern</button>
+          <button class="btn btn-sm" data-i18n="common.save" onclick="saveDataPath()">Save</button>
         </div>
         <div id="currentDataPath" style="margin-top:8px; font-size:12px; color:var(--text-dim);"></div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Daten verwalten</div>
-        <div id="dataSizeInfo" style="margin-bottom:12px; font-size:13px;">Lade ...</div>
+        <div class="panel-title" data-i18n="settings.manage_data">Manage data</div>
+        <div id="dataSizeInfo" style="margin-bottom:12px; font-size:13px;" data-i18n="common.loading">Loading…</div>
         <div class="btn-row" style="flex-wrap:wrap;">
-          <button class="btn btn-sm" onclick="clearCache()">Cache löschen</button>
-          <button class="btn btn-sm" onclick="clearLogs()">Logs löschen</button>
-          <button class="btn btn-danger btn-sm" onclick="clearAllData()">Alles löschen (äußer Config)</button>
-          <button class="btn btn-ghost btn-sm" onclick="loadDataSize()">&#8635; Aktualisieren</button>
+          <button class="btn btn-sm" data-i18n="settings.clear_cache" onclick="clearCache()">Clear cache</button>
+          <button class="btn btn-sm" data-i18n="settings.clear_logs" onclick="clearLogs()">Clear logs</button>
+          <button class="btn btn-danger btn-sm" data-i18n="settings.clear_all" onclick="clearAllData()">Delete everything except configuration</button>
+          <button class="btn btn-ghost btn-sm" data-i18n="common.refresh" onclick="loadDataSize()">↻ Refresh</button>
         </div>
         <div id="dataManageResult" style="margin-top:8px; font-size:13px;"></div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Request-Delay (Sekunden)</div>
+        <div class="panel-title" data-i18n="settings.request_delay">Request delay (seconds)</div>
         <input type="text" id="delayInput" placeholder="0.5" style="max-width:100px;">
         <div class="btn-row">
-          <button class="btn btn-sm" onclick="saveDelay()">Speichern</button>
+          <button class="btn btn-sm" data-i18n="common.save" onclick="saveDelay()">Save</button>
         </div>
       </div>
 
       <div class="panel">
-        <div class="panel-title">Lautstärke</div>
+        <div class="panel-title" data-i18n="settings.volume">Volume</div>
         <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;">
-          Globaler Regler für Audio-Vorschau und das USDB-iframe (Video-Embeds).
+          <span data-i18n="settings.volume_help">Global control for audio previews and media in the USDB frame.</span>
         </p>
         <div style="display:flex; align-items:center; gap:12px;">
           <span style="font-size:16px;">&#128264;</span>
@@ -747,75 +755,71 @@ iframe { border-radius: var(--radius); }
       </div>
 
       <div class="panel">
-        <div class="panel-title">Über UltraStar Importer</div>
-        <p style="font-size:12px; color:var(--text-dim); line-height:1.6;">
-          Version 0.1.0 · Copyright &copy; 2026 UltraStar Importer contributors<br>
-          Freie Software unter GPL-3.0-only. Ohne Gewährleistung; Nutzung auf eigene Verantwortung.
-          Dieses inoffizielle Projekt ist nicht mit USDB, Animux, YouTube oder UltraStar Deluxe verbunden.
-        </p>
+        <div class="panel-title" data-i18n="settings.about">About UltraStar Importer</div>
+        <p style="font-size:12px; color:var(--text-dim); line-height:1.6;" data-i18n-html="settings.about_text">Version 0.1.0 · Copyright © 2026 UltraStar Importer contributors<br>Free software under GPL-3.0-only. No warranty; use at your own risk.<br>This unofficial project is not affiliated with USDB, Animux, YouTube, or UltraStar Deluxe.</p>
         <div class="btn-row" style="flex-wrap:wrap;">
-          <a class="btn btn-ghost btn-sm" href="/legal/license" target="_blank" rel="noopener">GPLv3-Lizenz</a>
-          <a class="btn btn-ghost btn-sm" href="/legal/disclaimer" target="_blank" rel="noopener">Haftungs- und Nutzungshinweis</a>
-          <a class="btn btn-ghost btn-sm" href="/legal/third-party-notices" target="_blank" rel="noopener">Drittanbieter</a>
+          <a class="btn btn-ghost btn-sm" data-i18n="settings.license" href="/legal/license" target="_blank" rel="noopener">GPLv3 license</a>
+          <a class="btn btn-ghost btn-sm" data-i18n="settings.disclaimer" href="/legal/disclaimer" target="_blank" rel="noopener">Disclaimer and usage notice</a>
+          <a class="btn btn-ghost btn-sm" data-i18n="settings.third_party" href="/legal/third-party-notices" target="_blank" rel="noopener">Third-party software</a>
         </div>
       </div>
     </div>
 
     <!-- BIBLIOTHEK TAB (merged local + output) -->
     <div id="tab-library" style="display:none;">
-      <h1>Bibliothek</h1>
-      <div class="subtitle">Output-Songs durchsuchen, vorspielen, verwalten.</div>
+      <h1 data-i18n="library.title">Library</h1>
+      <div class="subtitle" data-i18n="library.subtitle">Browse, preview, and manage completed songs.</div>
 
       <div class="stats" id="libraryStats"></div>
 
       <div class="lib-toolbar">
         <div class="lib-search-wrap">
           <input type="text" class="lib-search" id="libSearchInput"
-            placeholder="Interpret oder Titel suchen..." oninput="filterLibrary()">
+            data-i18n-placeholder="library.search_placeholder" placeholder="Search by artist or title…" oninput="filterLibrary()">
         </div>
-        <button class="btn btn-ghost btn-sm" onclick="loadLibrary()">&#8635; Aktualisieren</button>
+        <button class="btn btn-ghost btn-sm" data-i18n="common.refresh" onclick="loadLibrary()">↻ Refresh</button>
       </div>
 
       <div class="lib-song-list" id="outputList"></div>
       <div id="outputEmpty" style="color:var(--text-dim); text-align:center; padding:40px; font-size:13px; display:none;">
-        Keine Songs gefunden.
+        <span data-i18n="library.empty">No songs found.</span>
       </div>
 
       <div class="panel" style="margin-top:16px;">
-        <div class="panel-title">Werkzeuge</div>
+        <div class="panel-title" data-i18n="library.tools">Tools</div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-          <button class="btn btn-sm" onclick="selectAllMissing()">&#9745; Alle fehlenden</button>
-          <button class="btn btn-sm" onclick="selectAllNone()">&#9744; Keine</button>
+          <button class="btn btn-sm" data-i18n="library.select_missing" onclick="selectAllMissing()">☑ Select all missing</button>
+          <button class="btn btn-sm" data-i18n="library.select_none" onclick="selectAllNone()">☐ Select none</button>
           <span style="width:1px; height:24px; background:var(--border); margin:0 4px;"></span>
-          <button class="btn btn-primary btn-sm" onclick="fixSelectedAssets(this)">&#128295; Auswahl reparieren</button>
-          <span class="checkbox-stats" id="selectedCount" style="color:var(--text-dim); font-size:12px;">0 ausgewählt</span>
+          <button class="btn btn-primary btn-sm" data-i18n="library.repair" onclick="fixSelectedAssets(this)">🔧 Repair selection</button>
+          <span class="checkbox-stats" id="selectedCount" style="color:var(--text-dim); font-size:12px;">0 selected</span>
           <span style="flex:1;"></span>
-          <button class="btn btn-sm" onclick="downloadBundle()">&#128230; Alles als ZIP</button>
+          <button class="btn btn-sm" data-i18n="library.download_all" onclick="downloadBundle()">📦 Download all as ZIP</button>
         </div>
       </div>
 
       <div class="panel" style="margin-top:16px;">
-        <div class="panel-title">Lokalen Ordner scannen</div>
+        <div class="panel-title" data-i18n="library.scan_local">Scan local folder</div>
         <div style="display:flex; gap:10px; align-items:center;">
           <input type="text" id="localScanPath" placeholder="D:\UltraStar\Songs" style="flex:1;">
-          <button class="btn btn-sm" onclick="scanLocal()">Scannen</button>
+          <button class="btn btn-sm" data-i18n="library.scan" onclick="scanLocal()">Scan</button>
         </div>
         <div id="localScanResult" style="margin-top:8px; font-size:13px;"></div>
       </div>
 
       <div class="panel" id="localSongsPanel" style="display:none; margin-top:16px;">
-        <div class="panel-title">Gefundene lokale Songs (<span id="localCount">0</span>)</div>
+        <div class="panel-title" id="localSongsTitle">Local songs found (0)</div>
         <div id="localSongList" style="max-height:300px; overflow-y:auto;"></div>
       </div>
 
       <div class="panel" style="margin-top:16px;">
-        <div class="panel-title">Match Report (USDB-Abgleich)</div>
+        <div class="panel-title" data-i18n="library.match">Match report (USDB comparison)</div>
         <p style="font-size:12px; color:var(--text-dim); margin-bottom:10px;">
-          USDB-Daten mit lokaler Bibliothek abgleichen.
+          <span data-i18n="library.match_help">Compare USDB data with the local library.</span>
         </p>
         <div class="btn-row" style="margin-bottom:12px;">
-          <button class="btn btn-sm" onclick="runMatch()">Match erstellen</button>
-          <button class="btn btn-ghost btn-sm" onclick="downloadMatch()">Download JSON</button>
+          <button class="btn btn-sm" data-i18n="library.create_match" onclick="runMatch()">Create report</button>
+          <button class="btn btn-ghost btn-sm" data-i18n="library.download_json" onclick="downloadMatch()">Download JSON</button>
         </div>
         <div id="matchContent"></div>
       </div>
@@ -823,14 +827,14 @@ iframe { border-radius: var(--radius); }
 
     <!-- SEARCH TAB -->
     <div id="tab-search" style="display:none;">
-      <h1>USDB durchsuchen</h1>
-      <div class="subtitle">Direkt auf USDB surfen. Auf Detailseiten erscheint ein "Zur Queue" Button.</div>
+      <h1 data-i18n="search.title">Browse USDB</h1>
+      <div class="subtitle" data-i18n="search.subtitle">Browse USDB directly. Song pages include an Add to queue button.</div>
       <div style="display:flex; gap:8px; margin-bottom:12px; align-items:center; flex-wrap:wrap;">
-        <button class="btn btn-ghost btn-sm" onclick="browseUSDB()">&#127968; Browse</button>
+        <button class="btn btn-ghost btn-sm" data-i18n="search.browse" onclick="browseUSDB()">⌂ Browse</button>
         <span style="width:1px; height:24px; background:var(--border); margin:0 4px;"></span>
-        <button class="btn btn-ghost btn-sm" onclick="iframeBack()" title="Zurück">&#8592;</button>
-        <button class="btn btn-ghost btn-sm" onclick="iframeForward()" title="Vor">&#8594;</button>
-        <button class="btn btn-ghost btn-sm" onclick="iframeReload()" title="Aktualisieren">&#8635;</button>
+        <button class="btn btn-ghost btn-sm" onclick="iframeBack()" data-i18n-title="search.back" title="Back">&#8592;</button>
+        <button class="btn btn-ghost btn-sm" onclick="iframeForward()" data-i18n-title="search.forward" title="Forward">&#8594;</button>
+        <button class="btn btn-ghost btn-sm" onclick="iframeReload()" data-i18n-title="search.reload" title="Reload">&#8635;</button>
       </div>
       <div id="iframeStatus" style="font-size:11px; color:var(--text-dim); margin-bottom:6px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;"></div>
       <div style="border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; height:70vh;">
@@ -843,7 +847,7 @@ iframe { border-radius: var(--radius); }
 
 <!-- Player bar -->
 <div class="player-bar" id="playerBar">
-  <button class="pb-close" id="pbPlayPause" title="Play/Pause">&#9209;</button>
+  <button class="pb-close" id="pbPlayPause" data-i18n-title="player.play_pause" title="Play/Pause">&#9209;</button>
   <div class="pb-info" id="pbTitle">—</div>
   <div class="pb-seek-wrap">
     <span class="pb-time" id="pbCurrent">0:00</span>
@@ -851,7 +855,7 @@ iframe { border-radius: var(--radius); }
     <span class="pb-time" id="pbDuration">0:00</span>
   </div>
   <div class="pb-vol-wrap" style="position:relative; display:flex; align-items:center; justify-content:center;">
-    <button class="pb-close" id="pbVolumeBtn" title="Lautstärke">&#128264;</button>
+    <button class="pb-close" id="pbVolumeBtn" data-i18n-title="player.volume" title="Volume">&#128264;</button>
     <div class="pb-volume-popup" id="pbVolumePopup">
       <div class="pb-volume-slider-rotate">
         <input type="range" class="pb-volume-vertical" id="pbVolumeSlider"
@@ -860,12 +864,16 @@ iframe { border-radius: var(--radius); }
       <span class="pb-volume-label" id="pbVolumePct">30%</span>
     </div>
   </div>
-  <button class="pb-close" id="pbClose" title="Schließen">&#10006;</button>
+  <button class="pb-close" id="pbClose" data-i18n-title="player.close" title="Close">&#10006;</button>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<script src="/static/i18n.js"></script>
 <script>
+const t = (key, params) => window.USII18n.t(key, params);
+const i18nReady = window.USII18n.init().catch(function (error) { console.error('i18n init failed', error); });
+
 // === Tab switching ===
 function showTab(tab) {
   var tabs = ['queue','settings','library','search'];
@@ -924,6 +932,7 @@ evt.addEventListener('message', (e) => {
 
 // === Queue rendering ===
 function renderQueue(items) {
+  window._lastQueueItems = items || [];
   const tbody = document.getElementById('queueBody');
   const empty = document.getElementById('queueEmpty');
   tbody.innerHTML = '';
@@ -938,7 +947,7 @@ function renderQueue(items) {
       stats[item.status] = (stats[item.status] || 0) + 1;
       const tr = document.createElement('tr');
       const statusLabel = {
-        pending: 'Wartet', processing: 'Laeuft', done: 'Fertig', error: 'Fehler'
+        pending: t('queue.status_pending'), processing: t('queue.status_processing'), done: t('queue.status_done'), error: t('queue.status_error')
       }[item.status] || item.status;
       const songName = item.artist || item.title
         ? `${item.artist || ''} - ${item.title || ''}`
@@ -959,7 +968,7 @@ function renderQueue(items) {
             ? `<span style="cursor:pointer; color:var(--text-dim);" onclick="removeItem(${item.id})">&#10006;</span>`
             : ''}
           ${item.status === 'error'
-            ? `<span style="cursor:pointer; color:var(--accent); font-size:16px;" onclick="retryItem(${item.id})" title="Erneut versuchen">&#8635;</span>`
+            ? `<span style="cursor:pointer; color:var(--accent); font-size:16px;" onclick="retryItem(${item.id})" title="${t('queue.retry')}">&#8635;</span>`
             : ''}
         </td>`;
       tbody.appendChild(tr);
@@ -978,7 +987,7 @@ function updateStatus(data) {
   fetchQueue();
   // Show toast on errors and completions
   if (data.status === 'error') {
-    toast('Fehler: ' + (data.progress || 'unbekannt'));
+    toast(t('common.error', {error: data.progress || t('common.unknown')}));
   }
 }
 
@@ -993,7 +1002,7 @@ async function fetchQueue() {
   try {
     const data = await apiJSON('/api/queue');
     renderQueue(data);
-  } catch(e) { toast('Queue-Load fehlgeschlagen'); }
+  } catch(e) { toast(t('message.queue_load_failed')); }
 }
 
 async function addLinks() {
@@ -1002,46 +1011,47 @@ async function addLinks() {
   try {
     const data = await apiJSON('/api/queue/add', {method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({urls: text})});
     if (data.added) document.getElementById('linkInput').value = '';
-    toast(data.added + ' Link(s) hinzugefuegt');
+    toast(t('message.links_added', {count: data.added}));
   } catch(e) {
-    toast('Fehler beim Hinzufügen: ' + e.message);
+    toast(t('message.add_failed', {error: e.message}));
   }
 }
 
 async function clearQueue() {
-  try { await api('/api/queue/clear', {method:'POST'}); toast('Queue geleert'); }
-  catch(e) { toast('Fehler beim Leeren'); }
+  try { await api('/api/queue/clear', {method:'POST'}); toast(t('message.queue_cleared')); }
+  catch(e) { toast(t('message.clear_failed')); }
 }
 
 async function removeItem(id) {
   try { await api('/api/queue/remove/' + id, {method:'POST'}); }
-  catch(e) { toast('Fehler beim Entfernen'); }
+  catch(e) { toast(t('message.remove_failed')); }
 }
 
 async function retryItem(id) {
   try {
     const data = await apiJSON('/api/queue/retry/' + id, {method:'POST'});
-    if (data.ok) toast('Item zurück in Warteschlange');
-    else toast(data.error || 'Fehler beim Retry');
-  } catch(e) { toast('Fehler beim Retry'); }
+    if (data.ok) toast(t('message.retry_queued'));
+    else toast(data.error || t('message.retry_failed'));
+  } catch(e) { toast(t('message.retry_failed')); }
 }
 
 async function startWorker() {
   try {
     const data = await apiJSON('/api/worker/start', {method:'POST'});
-    if (data.ok) { updateWorkerUI(true); toast('Worker gestartet'); }
-    else toast(data.error || 'Fehler');
-  } catch(e) { toast('Fehler beim Starten'); }
+    if (data.ok) { updateWorkerUI(true); toast(t('message.worker_started')); }
+    else toast(data.error || t('message.worker_start_failed'));
+  } catch(e) { toast(t('message.worker_start_failed')); }
 }
 
 async function stopWorker() {
-  try { await api('/api/worker/stop', {method:'POST'}); updateWorkerUI(false); toast('Worker gestoppt'); }
-  catch(e) { toast('Fehler beim Stoppen'); }
+  try { await api('/api/worker/stop', {method:'POST'}); updateWorkerUI(false); toast(t('message.worker_stopped')); }
+  catch(e) { toast(t('message.worker_stop_failed')); }
 }
 
 function updateWorkerUI(running) {
+  window._workerRunning = running;
   document.getElementById('workerDot').classList.toggle('running', running);
-  document.getElementById('workerStatus').textContent = running ? 'Worker laeuft' : 'Worker gestoppt';
+  document.getElementById('workerStatus').textContent = running ? t('queue.worker_running') : t('queue.worker_stopped');
   document.getElementById('workerStatus').style.color = running ? 'var(--green)' : 'var(--text-dim)';
   document.getElementById('btnStart').disabled = running;
   document.getElementById('btnStop').disabled = !running;
@@ -1063,19 +1073,19 @@ async function loadSettings() {
     const dpEl = document.getElementById('dataPathInput');
     if (dpEl) dpEl.value = data.data_path || '';
     const cdpEl = document.getElementById('currentDataPath');
-    if (cdpEl) cdpEl.textContent = 'Aktuell: ' + (data.data_path || '(Standard)');
+    if (cdpEl) cdpEl.textContent = t('settings.current_path', {path: data.data_path || t('settings.default_path')});
     document.getElementById('localScanPath').value = data.local_path || '';
     document.getElementById('delayInput').value = data.delay || 0.5;
     document.getElementById('outputInput').value = data.output_path || '';
-  } catch(e) { toast('Einstellungen laden fehlgeschlagen'); }
+  } catch(e) { toast(t('message.settings_load_failed')); }
 }
 
 async function saveDataPath() {
   const path = document.getElementById('dataPathInput').value.trim();
   try {
     await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({data_path: path})});
-    toast('Daten-Pfad gespeichert. Bitte App neu starten!');
-  } catch(e) { toast('Fehler beim Speichern'); }
+    toast(t('message.restart_required'));
+  } catch(e) { toast(t('message.save_failed')); }
 }
 
 // === Data management ===
@@ -1086,37 +1096,37 @@ async function loadDataSize() {
     const data = await apiJSON('/api/data/size');
     info.innerHTML = `
       <div style="display:grid; grid-template-columns:1fr auto; gap:4px 12px;">
-        <span style="color:var(--text-dim);">Daten-Ordner:</span><span style="word-break:break-all;">${escapeHtml(data.data_dir)}</span>
-        <span style="color:var(--text-dim);">Gesamt:</span><span><strong>${data.data_size_mb} MB</strong></span>
-        <span style="color:var(--text-dim);">Output-Songs:</span><span>${data.output_size_mb} MB</span>
-        <span style="color:var(--text-dim);">Cache:</span><span>${data.cache_size_mb} MB</span>
-        <span style="color:var(--text-dim);">Logs:</span><span>${data.log_size_mb} MB</span>
+        <span style="color:var(--text-dim);">${t('data.folder')}</span><span style="word-break:break-all;">${escapeHtml(data.data_dir)}</span>
+        <span style="color:var(--text-dim);">${t('data.total')}</span><span><strong>${data.data_size_mb} MB</strong></span>
+        <span style="color:var(--text-dim);">${t('data.output')}</span><span>${data.output_size_mb} MB</span>
+        <span style="color:var(--text-dim);">${t('data.cache')}</span><span>${data.cache_size_mb} MB</span>
+        <span style="color:var(--text-dim);">${t('data.logs')}</span><span>${data.log_size_mb} MB</span>
       </div>`;
-  } catch(e) { info.innerHTML = '<span style="color:var(--red);">Fehler beim Laden</span>'; }
+  } catch(e) { info.innerHTML = '<span style="color:var(--red);">' + escapeHtml(t('message.settings_load_failed')) + '</span>'; }
 }
 
 async function clearCache() {
-  if (!confirm('USDB-Cache wirklich löschen?')) return;
+  if (!confirm(t('message.cache_confirm'))) return;
   try {
     await api('/api/data/clear-cache', {method:'POST'});
-    toast('Cache gelöscht');
+    toast(t('message.cache_cleared'));
     loadDataSize();
-  } catch(e) { toast('Fehler beim Löschen'); }
+  } catch(e) { toast(t('common.error', {error: e.message})); }
 }
 
 async function clearLogs() {
   try {
     const data = await apiJSON('/api/data/clear-logs', {method:'POST'});
-    toast('Logs gelöscht (' + data.freed_mb + ' MB freigegeben)');
+    toast(t('message.logs_cleared', {size: data.freed_mb}));
     loadDataSize();
   } catch(e) { toast('Fehler beim Löschen'); }
 }
 
 async function clearAllData() {
-  if (!confirm('WARNUNG: Alle Daten (Cache, Logs, Output-Songs) werden gelöscht. Nur config.json bleibt erhalten. Fortfahren?')) return;
+  if (!confirm(t('message.clear_all_confirm'))) return;
   try {
     const data = await apiJSON('/api/data/clear-all', {method:'POST'});
-    toast('Daten gelöscht (' + data.freed_mb + ' MB freigegeben)');
+    toast(t('message.data_cleared', {size: data.freed_mb}));
     loadDataSize();
     loadLibrary();
   } catch(e) { toast('Fehler beim Löschen'); }
@@ -1128,7 +1138,7 @@ async function saveCookie() {
   try {
     await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cookie})});
     input.value = '';
-    toast('Cookie im Credential Manager gespeichert');
+    toast(t('message.cookie_saved'));
   } catch(e) { toast('Fehler beim Speichern'); }
 }
 
@@ -1136,35 +1146,35 @@ async function testCookie() {
   const cookie = document.getElementById('cookieInput').value;
   const result = document.getElementById('cookieResult');
   result.className = 'cookie-test-result';
-  result.textContent = 'Teste ...';
+  result.textContent = t('message.testing');
   try {
     const data = await apiJSON('/api/cookie/test', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({cookie})});
     if (data.ok) {
       result.className = 'cookie-test-result cookie-test-ok';
-      result.textContent = 'OK! Song erkannt: ' + data.song;
+      result.textContent = t('message.cookie_ok', {song: data.song});
     } else {
       result.className = 'cookie-test-result cookie-test-err';
-      result.textContent = 'Fehler: ' + (data.error || 'unbekannt');
+      result.textContent = t('common.error', {error: data.error || t('common.unknown')});
     }
   } catch(e) {
     result.className = 'cookie-test-result cookie-test-err';
-    result.textContent = 'Netzwerkfehler: ' + e.message;
+    result.textContent = t('common.network_error', {error: e.message});
   }
 }
 
 async function savePath() {
   const path = document.getElementById('pathInput').value;
-  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({local_path: path})}); document.getElementById('localScanPath').value = path; toast('Pfad gespeichert'); }
+  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({local_path: path})}); document.getElementById('localScanPath').value = path; toast(t('message.path_saved')); }
   catch(e) { toast('Fehler beim Speichern'); }
 }
 
 async function saveDelay() {
   const raw = document.getElementById('delayInput').value.trim();
-  if (!raw) { toast('Delay eingeben'); return; }
+  if (!raw) { toast(t('message.delay_required')); return; }
   const delay = Number(raw);
-  if (!Number.isFinite(delay)) { toast('Delay muss eine Zahl sein'); return; }
-  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({delay})}); toast('Delay gespeichert'); }
-  catch(e) { toast('Ungueltiger Delay'); }
+  if (!Number.isFinite(delay)) { toast(t('message.delay_number')); return; }
+  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({delay})}); toast(t('message.saved')); }
+  catch(e) { toast(t('message.save_failed')); }
 }
 
 // === Volume control ===
@@ -1228,7 +1238,7 @@ function togglePreview(folder, btn) {
   if (_previewFolder === folder && !ae.paused) {
     // Pause current
     ae.pause();
-    if (btn) { btn.innerHTML = '&#128266;'; btn.title = 'Vorspielen'; }
+    if (btn) { btn.innerHTML = '&#128266;'; btn.title = t('library.preview'); }
     updatePlayPauseIcon(false);
     return;
   }
@@ -1236,7 +1246,7 @@ function togglePreview(folder, btn) {
   // Stop previous button if any
   document.querySelectorAll('.preview-btn').forEach(function(b) {
     b.innerHTML = '&#128266;';
-    b.title = 'Vorspielen';
+    b.title = t('library.preview');
   });
 
   // Start new
@@ -1244,7 +1254,7 @@ function togglePreview(folder, btn) {
   ae.volume = _currentVolume;
   ae.play().catch(function() {});
   _previewFolder = folder;
-  if (btn) { btn.innerHTML = '&#9209;'; btn.title = 'Stop'; }
+  if (btn) { btn.innerHTML = '&#9209;'; btn.title = t('player.stop'); }
   showPlayerBar(folder);
 }
 
@@ -1254,7 +1264,7 @@ function stopPreview() {
   _previewFolder = null;
   document.querySelectorAll('.preview-btn').forEach(function(b) {
     b.innerHTML = '&#128266;';
-    b.title = 'Vorspielen';
+    b.title = t('library.preview');
   });
   document.getElementById('playerBar').classList.remove('visible');
 }
@@ -1271,7 +1281,7 @@ function updatePlayPauseIcon(playing) {
   var btn = document.getElementById('pbPlayPause');
   if (!btn) return;
   btn.innerHTML = playing ? '&#9209;' : '&#9654;';
-  btn.title = playing ? 'Pause' : 'Play';
+  btn.title = playing ? t('player.pause') : t('player.play');
 }
 
 function initPlayerBar() {
@@ -1359,7 +1369,7 @@ function initPlayerBar() {
   ae.addEventListener('ended', function() {
     document.querySelectorAll('.preview-btn').forEach(function(b) {
       b.innerHTML = '&#128266;';
-      b.title = 'Vorspielen';
+      b.title = t('library.preview');
     });
     _previewFolder = null;
     updatePlayPauseIcon(false);
@@ -1379,27 +1389,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function saveOutput() {
   const path = document.getElementById('outputInput').value;
-  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({output_path: path})}); toast('Output-Ordner gespeichert'); }
+  try { await api('/api/settings', {method:'PUT', headers:{'Content-Type':'application/json'}, body: JSON.stringify({output_path: path})}); toast(t('message.output_saved')); }
   catch(e) { toast('Fehler beim Speichern'); }
 }
 
 // === Local scan ===
 async function scanLocal() {
   const path = document.getElementById('localScanPath').value;
-  if (!path) { toast('Pfad eingeben'); return; }
-  document.getElementById('localScanResult').textContent = 'Scanne ...';
+  if (!path) { toast(t('message.scan_required')); return; }
+  document.getElementById('localScanResult').textContent = t('message.scanning');
   try {
     const data = await apiJSON('/api/local/scan', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({path})});
     if (data.ok) {
-      document.getElementById('localScanResult').textContent = data.count + ' Songs gefunden.';
+      document.getElementById('localScanResult').textContent = t('message.songs_found', {count: data.count});
       document.getElementById('localSongsPanel').style.display = '';
-      document.getElementById('localCount').textContent = data.count;
+      _lastLocalSongCount = data.count;
+      document.getElementById('localSongsTitle').textContent = t('library.local_found', {count: data.count});
       renderLocalSongs(data.songs);
     } else {
-      document.getElementById('localScanResult').textContent = 'Fehler: ' + data.error;
+      document.getElementById('localScanResult').textContent = t('common.error', {error: data.error});
     }
   } catch(e) {
-    document.getElementById('localScanResult').textContent = 'Netzwerkfehler: ' + e.message;
+    document.getElementById('localScanResult').textContent = t('common.network_error', {error: e.message});
   }
 }
 
@@ -1424,12 +1435,12 @@ function renderLocalSongs(songs) {
 
 // === Match ===
 async function runMatch() {
-  document.getElementById('matchContent').innerHTML = '<p style="color:var(--text-dim);">Erstelle Match ...</p>';
+  document.getElementById('matchContent').innerHTML = '<p style="color:var(--text-dim);">' + escapeHtml(t('message.creating_match')) + '</p>';
   try {
     const data = await apiJSON('/api/match');
     renderMatch(data);
   } catch(e) {
-    document.getElementById('matchContent').innerHTML = '<p style="color:var(--red);">Fehler: ' + e.message + '</p>';
+    document.getElementById('matchContent').innerHTML = '<p style="color:var(--red);">' + escapeHtml(t('common.error', {error: e.message})) + '</p>';
   }
 }
 
@@ -1438,13 +1449,13 @@ function renderMatch(data) {
   let html = '';
 
   const sections = [
-    {key:'matched', label:'Matched', color:'var(--green)'},
-    {key:'usdb_only', label:'Nur USDB', color:'var(--blue)'},
-    {key:'local_only', label:'Nur lokal', color:'var(--accent)'},
-    {key:'missing_video', label:'Fehlendes Video', color:'var(--red)'},
-    {key:'missing_cover', label:'Fehlendes Cover', color:'var(--red)'},
-    {key:'missing_mp3', label:'Fehlendes MP3', color:'var(--red)'},
-    {key:'missing_youtube', label:'Fehlender YT-Link', color:'var(--red)'},
+    {key:'matched', label:t('match.matched'), color:'var(--green)'},
+    {key:'usdb_only', label:t('match.usdb_only'), color:'var(--blue)'},
+    {key:'local_only', label:t('match.local_only'), color:'var(--accent)'},
+    {key:'missing_video', label:t('match.missing_video'), color:'var(--red)'},
+    {key:'missing_cover', label:t('match.missing_cover'), color:'var(--red)'},
+    {key:'missing_mp3', label:t('match.missing_mp3'), color:'var(--red)'},
+    {key:'missing_youtube', label:t('match.missing_youtube'), color:'var(--red)'},
   ];
 
   sections.forEach(sec => {
@@ -1457,7 +1468,7 @@ function renderMatch(data) {
       const name = `${item.artist || '?'} - ${item.title || '?'}`;
       html += `<div class="item"><span>${escapeHtml(name)}</span></div>`;
     });
-    if (items.length > 50) html += `<div style="color:var(--text-dim); padding:6px 0;">... und ${items.length-50} weitere</div>`;
+    if (items.length > 50) html += `<div style="color:var(--text-dim); padding:6px 0;">${escapeHtml(t('match.more', {count: items.length - 50}))}</div>`;
     html += '</div></div>';
   });
 
@@ -1469,8 +1480,6 @@ async function downloadMatch() {
 }
 
 // === Init ===
-loadSettings();
-fetchQueue();
 
 function updateCookieStatus(data) {
   const box = document.getElementById('cookieStatusBox');
@@ -1479,25 +1488,25 @@ function updateCookieStatus(data) {
     box.style.display = 'block';
     box.style.background = 'var(--green-dim)';
     box.style.color = 'var(--green)';
-    box.innerHTML = '&#10004; Eingeloggt (Cookie aktiv)';
+    box.textContent = t('message.logged_in');
   } else {
     box.style.display = 'block';
     box.style.background = 'var(--bg-elevated)';
     box.style.color = 'var(--text-dim)';
-    box.innerHTML = '&#10006; Nicht eingeloggt';
+    box.textContent = t('message.logged_out');
   }
 }
 
 async function openLoginWindow() {
-  toast('Login-Fenster wird geoeffnet ...');
+  toast(t('message.login_window'));
   try {
     const data = await apiJSON('/api/login-window', {method:'POST'});
-    if (!data.ok) toast('Fehler: ' + data.error);
-  } catch(e) { toast('Netzwerkfehler'); }
+    if (!data.ok) toast(t('common.error', {error: data.error}));
+  } catch(e) { toast(t('common.network_error', {error: e.message})); }
 }
 
 async function forgetCookie() {
-  try { await api('/api/cookie/forget', {method:'POST'}); document.getElementById('cookieInput').value = ''; updateCookieStatus({ok: false}); toast('Cookie gelöscht'); }
+  try { await api('/api/cookie/forget', {method:'POST'}); document.getElementById('cookieInput').value = ''; updateCookieStatus({ok: false}); toast(t('message.session_deleted')); }
   catch(e) { toast('Fehler beim Löschen'); }
 }
 
@@ -1516,7 +1525,7 @@ async function checkCookieStatus() {
     }
   } catch(e) { console.error('cookie status check failed', e); }
 }
-checkCookieStatus();
+// Cookie status is loaded after i18n initialization.
 
 // === Auto-Login ===
 async function loadCredentials() {
@@ -1524,13 +1533,13 @@ async function loadCredentials() {
     const data = await apiJSON('/api/credentials');
     const status = document.getElementById('credStatus');
     if (data.has_credentials) {
-      status.innerHTML = '<span style="color:var(--green);">&#10004; Gespeichert: <strong>' + escapeHtml(data.username) + '</strong></span>';
+      status.innerHTML = '<span style="color:var(--green);">' + escapeHtml(t('message.credentials_saved_as', {username: data.username})) + '</span>';
       const userField = document.getElementById('credUser');
       if (userField) userField.value = data.username;
       const passField = document.getElementById('credPass');
-      if (passField) passField.placeholder = '*** (bereits gespeichert)';
+      if (passField) passField.placeholder = t('settings.password_saved');
     } else {
-      status.innerHTML = '<span style="color:var(--text-dim);">Keine Login-Daten hinterlegt</span>';
+      status.innerHTML = '<span style="color:var(--text-dim);">' + escapeHtml(t('message.no_credentials')) + '</span>';
     }
   } catch(e) { console.error('cred load failed', e); }
 }
@@ -1538,13 +1547,13 @@ async function loadCredentials() {
 async function saveCredentials() {
   const user = document.getElementById('credUser').value.trim();
   const password = document.getElementById('credPass').value;
-  if (!user) { toast('Benutzername eingeben'); return; }
+  if (!user) { toast(t('message.username_required')); return; }
   try {
     await api('/api/credentials', {
       method:'PUT', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({username: user, password: password})
     });
-    toast('Login-Daten gespeichert');
+    toast(t('message.credentials_saved'));
     document.getElementById('credPass').value = '';
     loadCredentials();
   } catch(e) { toast('Fehler beim Speichern'); }
@@ -1553,7 +1562,7 @@ async function saveCredentials() {
 async function deleteCredentials() {
   try {
     await api('/api/credentials/delete', {method:'POST'});
-    toast('Login-Daten gelöscht');
+    toast(t('message.credentials_deleted'));
     document.getElementById('credUser').value = '';
     document.getElementById('credPass').value = '';
     loadCredentials();
@@ -1563,25 +1572,24 @@ async function deleteCredentials() {
 async function doAutoLogin() {
   const result = document.getElementById('credResult');
   result.style.color = 'var(--text-dim)';
-  result.textContent = 'Logge ein ...';
+  result.textContent = t('message.logging_in');
   try {
     const data = await apiJSON('/api/auto-login', {method:'POST'});
     if (data.ok) {
       result.style.color = 'var(--green)';
-      result.textContent = 'Auto-Login erfolgreich';
-      toast('Auto-Login erfolgreich');
+      result.textContent = t('message.login_success');
+      toast(t('message.login_success'));
       checkCookieStatus();
     } else {
       result.style.color = 'var(--red)';
-      result.textContent = 'Fehler: ' + (data.error || 'unbekannt');
+      result.textContent = t('common.error', {error: data.error || t('common.unknown')});
     }
   } catch(e) {
     result.style.color = 'var(--red)';
     result.textContent = 'Netzwerkfehler: ' + e.message;
   }
 }
-loadCredentials();
-loadDataSize();
+// Credentials and data sizes are loaded after i18n initialization.
 
 // === Search via proxy iframe ===
 const _iframeHistory = [];
@@ -1735,15 +1743,15 @@ function renderLibrary() {
   list.innerHTML = '';
   var groups = {};
   songs.forEach(function(song) {
-    var artist = song.artist || 'Unbekannt';
+    var artist = song.artist || t('library.unknown_artist');
     if (!groups[artist]) groups[artist] = [];
     groups[artist].push(song);
   });
 
   var artistNames = Object.keys(groups).sort(function(a, b) {
-    if (a === 'Unbekannt') return 1;
-    if (b === 'Unbekannt') return -1;
-    return a.localeCompare(b, 'de');
+    if (a === t('library.unknown_artist')) return 1;
+    if (b === t('library.unknown_artist')) return -1;
+    return a.localeCompare(b, window.USII18n.language);
   });
 
   artistNames.forEach(function(artist) {
@@ -1756,7 +1764,7 @@ function renderLibrary() {
     header.className = 'lib-group-header';
     header.innerHTML = '<span class="lib-arrow">▶</span>'
       + '<span style="flex:1;">' + escapeHtml(artist) + '</span>'
-      + '<span class="lib-count">' + groupSongs.length + ' Song' + (groupSongs.length !== 1 ? 's' : '') + '</span>';
+      + '<span class="lib-count">' + escapeHtml(t('library.song_count', {count: groupSongs.length})) + '</span>';
     groupDiv.appendChild(header);
 
     var songList = document.createElement('div');
@@ -1802,9 +1810,9 @@ function renderLibrary() {
         + '  </div>'
         + '</div>'
         + '<div class="lib-song-actions">'
-        + '  <button class="lib-play preview-btn" data-folder="' + escapeHtml(song.folder) + '" title="Vorspielen">▶</button>'
+        + '  <button class="lib-play preview-btn" data-folder="' + escapeHtml(song.folder) + '" title="' + escapeHtml(t('library.preview')) + '">▶</button>'
         + '  <a href="/api/output/zip-folder?folder=' + encodeURIComponent(song.folder) + '" title="ZIP">📦</a>'
-        + '  <button class="lib-delete" data-folder="' + escapeHtml(song.folder) + '" title="Löschen">🗑</button>'
+        + '  <button class="lib-delete" data-folder="' + escapeHtml(song.folder) + '" title="' + escapeHtml(t('library.delete')) + '">🗑</button>'
         + '</div>';
 
       songList.appendChild(card);
@@ -1829,12 +1837,12 @@ async function loadLibrary() {
   var empty = document.getElementById('outputEmpty');
   var stats = document.getElementById('libraryStats');
   if (!list) return;
-  list.innerHTML = '<p style="color:var(--text-dim);padding:24px;text-align:center;">Lade ...</p>';
+  list.innerHTML = '<p style="color:var(--text-dim);padding:24px;text-align:center;">' + escapeHtml(t('common.loading')) + '</p>';
   empty.style.display = 'none';
 
   try {
     var data = await apiJSON('/api/output/list');
-    if (!data.ok) { list.innerHTML = '<p style="color:var(--red);">Fehler: ' + data.error + '</p>'; return; }
+    if (!data.ok) { list.innerHTML = '<p style="color:var(--red);">' + escapeHtml(t('common.error', {error: data.error})) + '</p>'; return; }
 
     var songs = data.songs || [];
     _libAllSongs = songs;
@@ -1844,19 +1852,19 @@ async function loadLibrary() {
     var withMp3 = songs.filter(function(s) { return s.has_mp3; }).length;
     var withVideo = songs.filter(function(s) { return s.has_video; }).length;
     stats.innerHTML = ''
-      + '<div class="stat-card"><div class="stat-num">' + songs.length + '</div><div class="stat-label">Songs</div></div>'
-      + '<div class="stat-card green"><div class="stat-num">' + withMp3 + '</div><div class="stat-label">Mit Audio</div></div>'
-      + '<div class="stat-card blue"><div class="stat-num">' + withVideo + '</div><div class="stat-label">Mit Video</div></div>'
-      + '<div class="stat-card"><div class="stat-num">' + totalMB.toFixed(0) + '</div><div class="stat-label">MB gesamt</div></div>';
+      + '<div class="stat-card"><div class="stat-num">' + songs.length + '</div><div class="stat-label">' + escapeHtml(t('library.songs')) + '</div></div>'
+      + '<div class="stat-card green"><div class="stat-num">' + withMp3 + '</div><div class="stat-label">' + escapeHtml(t('library.with_audio')) + '</div></div>'
+      + '<div class="stat-card blue"><div class="stat-num">' + withVideo + '</div><div class="stat-label">' + escapeHtml(t('library.with_video')) + '</div></div>'
+      + '<div class="stat-card"><div class="stat-num">' + totalMB.toFixed(0) + '</div><div class="stat-label">' + escapeHtml(t('library.total_mb')) + '</div></div>';
 
     renderLibrary();
   } catch(e) {
-    list.innerHTML = '<p style="color:var(--red);">Netzwerkfehler: ' + e.message + '</p>';
+    list.innerHTML = '<p style="color:var(--red);">' + escapeHtml(t('common.network_error', {error: e.message})) + '</p>';
   }
 }
 
 async function deleteOutputSong(folder, btn) {
-  if (!confirm('Song "' + folder + '" wirklich löschen?')) return;
+  if (!confirm(t('message.delete_song_confirm', {name: folder}))) return;
   btn.textContent = '...';
   btn.disabled = true;
   try {
@@ -1864,24 +1872,24 @@ async function deleteOutputSong(folder, btn) {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({folder})
     });
-    toast('Gelöscht: ' + folder);
+    toast(t('message.deleted', {name: folder}));
     loadLibrary();
   } catch(e) {
     toast('Fehler beim Löschen');
-    btn.textContent = 'Löschen';
+    btn.textContent = t('library.delete');
     btn.disabled = false;
   }
 }
 
 function downloadBundle() {
-  toast('Erstelle ZIP-Bundle ...');
+  toast(t('message.bundle'));
   window.location.href = '/api/output/zip';
 }
 
 function updateSelectedCount() {
   const cbs = document.querySelectorAll('.song-cb:checked');
   const el = document.getElementById('selectedCount');
-  if (el) el.textContent = cbs.length + ' ausgewählt';
+  if (el) el.textContent = t('library.selected', {count: cbs.length});
 }
 
 function selectAllMissing() {
@@ -1900,11 +1908,11 @@ async function fixSelectedAssets(btn) {
   const selected = Array.from(document.querySelectorAll('.song-cb:checked'))
     .map(cb => cb.dataset.folder);
   if (selected.length === 0) {
-    toast('Bitte zuerst Songs anhaken');
+    toast(t('message.select_songs'));
     return;
   }
-  if (!confirm(`${selected.length} Song(s) reparieren?\nFehlende Covers, Videos und MP3s werden nachgeladen.`)) return;
-  btn.textContent = 'Lädt ...';
+  if (!confirm(t('message.repair_confirm', {count: selected.length}))) return;
+  btn.textContent = t('message.repairing');
   btn.disabled = true;
   try {
     const data = await apiJSON('/api/output/fix-assets', {
@@ -1914,36 +1922,36 @@ async function fixSelectedAssets(btn) {
     });
     const total = (data.fixed || []).reduce((a, s) => a + s.fixed.length, 0);
     if (total > 0) {
-      toast(`${total} Asset(s) bei ${data.fixed.length} Song(s) repariert`);
+      toast(t('message.repaired', {assets: total, songs: data.fixed.length}));
     } else {
-      toast('Nichts zu reparieren oder Fehler.');
+      toast(t('message.nothing_to_repair'));
     }
     if (data.errors && data.errors.length > 0) {
       console.log('Reparatur-Fehler:', data.errors);
-      toast(`${data.errors.length} Fehler (siehe Konsole)`);
+      toast(t('message.errors_console', {count: data.errors.length}));
     }
     loadLibrary();
   } catch(e) {
     toast('Fehler: ' + e.message);
   } finally {
-    btn.innerHTML = '&#128295; Auswahl reparieren';
+    btn.textContent = t('library.repair');
     btn.disabled = false;
   }
 }
 
 async function fixCovers(btn) {
   // Legacy: delegate to fix-assets cover-only
-  btn.textContent = 'Lädt ...';
+  btn.textContent = t('message.repairing');
   btn.disabled = true;
   try {
     const data = await apiJSON('/api/output/fix-covers', {method:'POST'});
     if (data.total_fixed > 0) {
-      toast(` ${data.total_fixed} Cover geladen!`);
+      toast(t('message.covers_loaded', {count: data.total_fixed}));
     } else {
-      toast('Keine fehlenden Covers gefunden.');
+      toast(t('message.no_missing_covers'));
     }
     if (data.errors && data.errors.length > 0) {
-      toast(`${data.errors.length} Fehler (siehe Konsole)`);
+      toast(t('message.errors_console', {count: data.errors.length}));
       console.log('Cover-Fehler:', data.errors);
     }
     if (data.skipped && data.skipped.length > 0) {
@@ -1953,10 +1961,40 @@ async function fixCovers(btn) {
   } catch(e) {
     toast('Fehler: ' + e.message);
   } finally {
-    btn.textContent = '🖼 Fehlende Covers';
+    btn.textContent = t('library.repair');
     btn.disabled = false;
   }
 }
+
+function refreshDynamicTranslations() {
+  if (window._lastQueueItems) renderQueue(window._lastQueueItems);
+  if (typeof window._workerRunning === 'boolean') updateWorkerUI(window._workerRunning);
+  if (_libAllSongs.length) renderLibrary();
+  updateSelectedCount();
+  var localTitle = document.getElementById('localSongsTitle');
+  if (localTitle) {
+    var count = (_lastLocalSongCount || 0);
+    localTitle.textContent = t('library.local_found', {count: count});
+  }
+}
+
+var _lastLocalSongCount = 0;
+document.addEventListener('usi:languagechange', function () {
+  refreshDynamicTranslations();
+  loadSettings();
+  loadDataSize();
+  loadCredentials();
+  checkCookieStatus();
+});
+
+i18nReady.then(function () {
+  loadSettings();
+  fetchQueue();
+  checkCookieStatus();
+  loadCredentials();
+  loadDataSize();
+  refreshDynamicTranslations();
+});
 </script>
 </body>
 </html>

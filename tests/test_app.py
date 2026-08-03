@@ -492,3 +492,15 @@ def test_unknown_legal_document_is_not_served():
     with app.app.test_client() as client:
         response = client.get("/legal/../../config.json")
     assert response.status_code == 404
+
+
+@pytest.mark.parametrize("locale", ["en", "de", "es", "ru"])
+def test_i18n_assets_are_served(locale):
+    with app.app.test_client() as client:
+        runtime = client.get("/static/i18n.js")
+        catalog = client.get(f"/static/i18n/{locale}.json")
+    assert runtime.status_code == 200
+    assert "javascript" in runtime.mimetype
+    assert catalog.status_code == 200
+    assert catalog.headers["Content-Type"].startswith("application/json")
+    assert json.loads(catalog.data)["app.title"] == "UltraStar Importer"
