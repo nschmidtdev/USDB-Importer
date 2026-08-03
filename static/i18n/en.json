@@ -74,7 +74,7 @@
   "settings.volume": "Volume",
   "settings.volume_help": "Global control for audio previews and media in the USDB frame.",
   "settings.about": "About UltraStar Importer",
-  "settings.about_text": "Version 0.1.1 · Copyright © 2026 UltraStar Importer contributors<br>Free software under GPL-3.0-only. No warranty; use at your own risk.<br>This unofficial project is not affiliated with USDB, Animux, YouTube, or UltraStar Deluxe.",
+  "settings.about_text": "Version 0.1.2 · Copyright © 2026 UltraStar Importer contributors<br>Free software under GPL-3.0-only. No warranty; use at your own risk.<br>This unofficial project is not affiliated with USDB, Animux, YouTube, or UltraStar Deluxe.",
   "settings.license": "GPLv3 license",
   "settings.disclaimer": "Disclaimer and usage notice",
   "settings.third_party": "Third-party software",

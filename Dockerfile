@@ -1,8 +1,8 @@
 FROM python:3.12-slim-bookworm
 
 LABEL org.opencontainers.image.title="UltraStar Importer" \
-      org.opencontainers.image.description="UltraStar karaoke library manager - authenticated server mode" \
-      org.opencontainers.image.version="0.1.0" \
+      org.opencontainers.image.description="Local self-hosted UltraStar song importer" \
+      org.opencontainers.image.source="https://github.com/nschmidtdev/USDB-Importer" \
       org.opencontainers.image.licenses="GPL-3.0-only"
 
 RUN apt-get update && apt-get install -y --no-install-recommends \

@@ -23,7 +23,7 @@ with USDB, Animux, YouTube, Google, or UltraStar Deluxe.
 
 ## Status
 
-The current public target release is **0.1.1 (Beta)**. Automated tests cover the
+The current public target release is **0.1.2 (Beta)**. Automated tests cover the
 main workflow, but changes to USDB or YouTube can still break individual
 features. Back up the destination folder before running a large import.
 
@@ -144,10 +144,17 @@ mkdir -p data output
 ```
 
 Replace `USDB_USERNAME` and `USDB_PASSWORD` in `.env` with your own strong values,
-then start the server:
+then pull the versioned image from GitHub Container Registry and start the server:
 
 ```bash
-docker compose up --build -d
+docker compose pull
+docker compose up -d
+```
+
+To build from the checked-out source instead, use the local build override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
 ```
 
 The web interface is available at <http://127.0.0.1:5776>. `/health` is
@@ -171,7 +178,7 @@ Docker Desktop is not required. To use a Docker Engine running in WSL2:
 
 ```bash
 wsl.exe -d Ubuntu-24.04 -- bash -lc \
-  'cd /mnt/d/PATH/TO/ultrastar-importer && docker compose up --build -d'
+  'cd /mnt/d/PATH/TO/ultrastar-importer && docker compose pull && docker compose up -d'
 ```
 
 ## Data and privacy

@@ -29,16 +29,21 @@ sauberen Windows-System mit installierter WebView2 Runtime und FFmpeg.
 
 ## Version
 
-1. `src/version.py` aktualisieren.
+1. `src/version.py`, den Standard-Image-Tag in `docker-compose.yml` und
+   `.env.example` aktualisieren.
 2. `CHANGELOG.md` von `Unreleased` in die neue Version überführen.
 3. Tag im Format `vMAJOR.MINOR.PATCH` erstellen. Der Tag muss exakt zur Version
    in `src/version.py` passen.
 4. Den Tag zu GitHub pushen. GitHub Actions führt Windows-Tests, EXE-Paketierung
    und den Docker-Smoke-Test aus.
-5. Nach grünen Qualitätsgates erstellt die Pipeline das GitHub Release automatisch
-   und hängt Windows-ZIP sowie SHA-256-Prüfsumme an. Die automatisch erzeugten
-   Quellcodearchive bleiben am selben Release verfügbar.
-6. Die automatisch erzeugten Release Notes bei Bedarf anhand des Changelogs
+5. Nach grünen Qualitätsgates erstellt die Pipeline das GitHub Release automatisch,
+   hängt Windows-ZIP sowie SHA-256-Prüfsumme an und veröffentlicht das Container-
+   Image als `ghcr.io/nschmidtdev/usdb-importer:<version>` sowie `latest`.
+   Die automatisch erzeugten Quellcodearchive bleiben am selben Release verfügbar.
+6. Beim erstmaligen Erstellen des GHCR-Pakets dessen Sichtbarkeit in den
+   Paketeinstellungen auf **Public** setzen. Diese Einstellung bleibt für spätere
+   Versionen erhalten.
+7. Die automatisch erzeugten Release Notes bei Bedarf anhand des Changelogs
    ergänzen.
 
 Das Docker-Image darf nicht als öffentlich erreichbarer Dienst beworben werden.

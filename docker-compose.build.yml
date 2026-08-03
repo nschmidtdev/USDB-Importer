@@ -1,0 +1,4 @@
+services:
+  ultrastar-importer:
+    image: ultrastar-importer:local
+    build: .

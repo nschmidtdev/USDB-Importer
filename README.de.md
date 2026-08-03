@@ -23,7 +23,7 @@ keiner Verbindung zu USDB, Animux, YouTube, Google oder UltraStar Deluxe.
 
 ## Status
 
-Die aktuelle öffentliche Zielversion ist **0.1.1 (Beta)**. Der Kernworkflow ist
+Die aktuelle öffentliche Zielversion ist **0.1.2 (Beta)**. Der Kernworkflow ist
 automatisiert getestet, dennoch können Änderungen an USDB oder YouTube einzelne
 Funktionen jederzeit beeinträchtigen. Vor einem großen Import sind Backups des
 Zielordners empfohlen.
@@ -148,10 +148,18 @@ mkdir -p data output
 ```
 
 Anschließend `USDB_USERNAME` und `USDB_PASSWORD` in `.env` durch eigene, starke
-Werte ersetzen und starten:
+Werte ersetzen, das versionierte Image aus der GitHub Container Registry laden
+und starten:
 
 ```bash
-docker compose up --build -d
+docker compose pull
+docker compose up -d
+```
+
+Zum lokalen Bauen aus dem ausgecheckten Quellcode dient das Build-Override:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build -d
 ```
 
 Die Oberfläche ist danach unter <http://127.0.0.1:5776> erreichbar. `/health`
@@ -175,7 +183,7 @@ Docker Desktop ist nicht erforderlich. Mit einer Docker Engine in WSL2:
 
 ```bash
 wsl.exe -d Ubuntu-24.04 -- bash -lc \
-  'cd /mnt/d/PFAD/ZUM/ultrastar-importer && docker compose up --build -d'
+  'cd /mnt/d/PFAD/ZUM/ultrastar-importer && docker compose pull && docker compose up -d'
 ```
 
 ## Daten und Datenschutz

@@ -6,6 +6,16 @@ und die Versionierung an [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-08-03
+
+### Added
+
+- Added release-tag publishing of tested Docker images to GitHub Container Registry.
+
+### Fixed
+
+- Fixed stale OCI version metadata by deriving it from the project release version.
+
 ## [0.1.1] - 2026-08-02
 
 ### Added

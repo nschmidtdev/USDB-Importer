@@ -74,7 +74,7 @@
   "settings.volume": "Lautstärke",
   "settings.volume_help": "Globaler Regler für Audiovorschau und Medien im USDB-Fenster.",
   "settings.about": "Über UltraStar Importer",
-  "settings.about_text": "Version 0.1.1 · Copyright © 2026 UltraStar Importer contributors<br>Freie Software unter GPL-3.0-only. Ohne Gewährleistung; Nutzung auf eigene Verantwortung.<br>Dieses inoffizielle Projekt ist nicht mit USDB, Animux, YouTube oder UltraStar Deluxe verbunden.",
+  "settings.about_text": "Version 0.1.2 · Copyright © 2026 UltraStar Importer contributors<br>Freie Software unter GPL-3.0-only. Ohne Gewährleistung; Nutzung auf eigene Verantwortung.<br>Dieses inoffizielle Projekt ist nicht mit USDB, Animux, YouTube oder UltraStar Deluxe verbunden.",
   "settings.license": "GPLv3-Lizenz",
   "settings.disclaimer": "Haftungs- und Nutzungshinweis",
   "settings.third_party": "Drittanbieter",

@@ -118,12 +118,25 @@ jobs:
       - name: Check out source
         uses: actions/checkout@v4
 
+      - name: Read project version
+        id: version
+        shell: bash
+        run: |
+          version="$(python -c 'from src.version import __version__; print(__version__)')"
+          echo "value=$version" >> "$GITHUB_OUTPUT"
+
       - name: Build image
-        run: docker build --tag ultrastar-importer:ci .
+        run: |
+          docker build \
+            --label "org.opencontainers.image.version=${{ steps.version.outputs.value }}" \
+            --label "org.opencontainers.image.revision=${GITHUB_SHA}" \
+            --tag ultrastar-importer:ci .
 
       - name: Verify image metadata and legal files
         run: |
           test "$(docker image inspect --format '{{.Config.User}}' ultrastar-importer:ci)" = "app"
+          test "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.version"}}' ultrastar-importer:ci)" = "${{ steps.version.outputs.value }}"
+          test "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.source"}}' ultrastar-importer:ci)" = "https://github.com/nschmidtdev/USDB-Importer"
           docker run --rm ultrastar-importer:ci test -r /app/LICENSE
           docker run --rm ultrastar-importer:ci test -r /app/THIRD_PARTY_LICENSES.txt
 
@@ -137,13 +150,13 @@ jobs:
 
       - name: Check health and authentication
         run: |
-          for attempt in $(seq 1 30); do
+          for _ in $(seq 1 30); do
             if curl --fail --silent http://127.0.0.1:5776/health > health.json; then
               break
             fi
             sleep 1
           done
-          python -c 'import json; data=json.load(open("health.json")); assert data == {"ok": True, "version": "0.1.1"}, data'
+          EXPECTED_VERSION="${{ steps.version.outputs.value }}" python -c 'import json, os; data=json.load(open("health.json")); assert data == {"ok": True, "version": os.environ["EXPECTED_VERSION"]}, data'
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:5776/)" = "401"
           test "$(curl --silent --user ci-user:ci-password-not-a-secret --output /dev/null --write-out '%{http_code}' http://127.0.0.1:5776/)" = "200"
 
@@ -155,12 +168,109 @@ jobs:
         if: always()
         run: docker rm --force ultrastar-importer-ci || true
 
+  publish-container:
+    name: Publish container to GHCR
+    if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
+    needs:
+      - windows-test-and-package
+      - docker-smoke-test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate release version
+        id: release
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python -c 'from src.version import __version__; print(__version__)')"
+          test "$GITHUB_REF_NAME" = "v$version"
+          image="ghcr.io/${GITHUB_REPOSITORY,,}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+
+      - name: Build release image
+        env:
+          IMAGE: ${{ steps.release.outputs.image }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          docker build --pull \
+            --label "org.opencontainers.image.version=$VERSION" \
+            --label "org.opencontainers.image.revision=$GITHUB_SHA" \
+            --label "org.opencontainers.image.created=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" \
+            --tag "$IMAGE:$VERSION" \
+            --tag "$IMAGE:latest" .
+          test "$(docker image inspect --format '{{.Config.User}}' "$IMAGE:$VERSION")" = "app"
+          test "$(docker image inspect --format '{{index .Config.Labels "org.opencontainers.image.version"}}' "$IMAGE:$VERSION")" = "$VERSION"
+          docker run --rm "$IMAGE:$VERSION" test -r /app/LICENSE
+          docker run --rm "$IMAGE:$VERSION" test -r /app/THIRD_PARTY_LICENSES.txt
+
+      - name: Start exact release image
+        env:
+          IMAGE: ${{ steps.release.outputs.image }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          docker run --detach --name ultrastar-importer-release \
+            --publish 127.0.0.1:5776:5776 \
+            --env USDB_USERNAME=ci-user \
+            --env USDB_PASSWORD=ci-password-not-a-secret \
+            "$IMAGE:$VERSION"
+
+      - name: Smoke-test exact release image
+        env:
+          EXPECTED_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          for _ in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:5776/health > health.json; then
+              break
+            fi
+            sleep 1
+          done
+          python -c 'import json, os; data=json.load(open("health.json")); assert data == {"ok": True, "version": os.environ["EXPECTED_VERSION"]}, data'
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:5776/)" = "401"
+          test "$(curl --silent --user ci-user:ci-password-not-a-secret --output /dev/null --write-out '%{http_code}' http://127.0.0.1:5776/)" = "200"
+
+      - name: Show release container logs on failure
+        if: failure()
+        run: docker logs ultrastar-importer-release
+
+      - name: Stop release container
+        if: always()
+        run: docker rm --force ultrastar-importer-release || true
+
+      - name: Log in to GitHub Container Registry
+        env:
+          GHCR_TOKEN: ${{ github.token }}
+        run: echo "$GHCR_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+
+      - name: Push tested versioned and latest tags
+        env:
+          IMAGE: ${{ steps.release.outputs.image }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          docker push "$IMAGE:$VERSION"
+          docker push "$IMAGE:latest"
+          docker buildx imagetools inspect "$IMAGE:$VERSION"
+
+      - name: Log out from GitHub Container Registry
+        if: always()
+        run: docker logout ghcr.io || true
+
   publish-release:
     name: Publish GitHub release
     if: github.ref_type == 'tag' && startsWith(github.ref_name, 'v')
     needs:
       - windows-test-and-package
       - docker-smoke-test
+      - publish-container
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
