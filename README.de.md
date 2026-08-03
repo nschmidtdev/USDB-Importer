@@ -23,7 +23,7 @@ keiner Verbindung zu USDB, Animux, YouTube, Google oder UltraStar Deluxe.
 
 ## Status
 
-Die aktuelle öffentliche Zielversion ist **0.1.0 (Beta)**. Der Kernworkflow ist
+Die aktuelle öffentliche Zielversion ist **0.1.1 (Beta)**. Der Kernworkflow ist
 automatisiert getestet, dennoch können Änderungen an USDB oder YouTube einzelne
 Funktionen jederzeit beeinträchtigen. Vor einem großen Import sind Backups des
 Zielordners empfohlen.

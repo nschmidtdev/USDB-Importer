@@ -172,7 +172,7 @@ class TestServerSecurity:
             allowed = client.get("/", headers={"Authorization": "Basic YWRtaW46Y29ycmVjdC1ob3JzZQ=="})
 
         assert health.status_code == 200
-        assert health.get_json() == {"ok": True, "version": "0.1.0"}
+        assert health.get_json() == {"ok": True, "version": "0.1.1"}
         assert denied.status_code == 401
         assert allowed.status_code == 200
 
@@ -468,7 +468,7 @@ def test_health_reports_project_version():
     with app.app.test_client() as client:
         response = client.get("/health")
     assert response.status_code == 200
-    assert response.get_json() == {"ok": True, "version": "0.1.0"}
+    assert response.get_json() == {"ok": True, "version": "0.1.1"}
 
 
 @pytest.mark.parametrize(

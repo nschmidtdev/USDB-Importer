@@ -23,7 +23,7 @@ with USDB, Animux, YouTube, Google, or UltraStar Deluxe.
 
 ## Status
 
-The current public target release is **0.1.0 (Beta)**. Automated tests cover the
+The current public target release is **0.1.1 (Beta)**. Automated tests cover the
 main workflow, but changes to USDB or YouTube can still break individual
 features. Back up the destination folder before running a large import.
 

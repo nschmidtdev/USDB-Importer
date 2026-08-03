@@ -1,7 +1,7 @@
 services:
   ultrastar-importer:
     build: .
-    image: ultrastar-importer:0.1.0
+    image: ultrastar-importer:0.1.1
     container_name: ultrastar-importer
     restart: unless-stopped
     init: true

@@ -143,7 +143,7 @@ jobs:
             fi
             sleep 1
           done
-          python -c 'import json; data=json.load(open("health.json")); assert data == {"ok": True, "version": "0.1.0"}, data'
+          python -c 'import json; data=json.load(open("health.json")); assert data == {"ok": True, "version": "0.1.1"}, data'
           test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:5776/)" = "401"
           test "$(curl --silent --user ci-user:ci-password-not-a-secret --output /dev/null --write-out '%{http_code}' http://127.0.0.1:5776/)" = "200"
 
