@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.15-slim-bookworm
 
 LABEL org.opencontainers.image.title="UltraStar Importer" \
       org.opencontainers.image.description="Local self-hosted UltraStar song importer" \
